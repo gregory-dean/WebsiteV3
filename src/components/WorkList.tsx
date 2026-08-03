@@ -1,16 +1,18 @@
 "use client";
 
 import {
+  AppWindow,
   ArrowUpRight,
   Building2,
-  GalleryHorizontalEnd,
   Shield,
   Wifi,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { experience, reveal } from "@/data/site";
+import { useState } from "react";
+import { experience, reveal, type ExperienceItem } from "@/data/site";
 import { cn } from "@/lib/cn";
+import { WorkDetailPanel } from "@/components/WorkDetailPanel";
 
 const icons = {
   building: Building2,
@@ -18,10 +20,22 @@ const icons = {
   wifi: Wifi,
 } as const;
 
-type Item = (typeof experience)[number];
+function isExternal(href: string) {
+  return /^https?:\/\//.test(href);
+}
 
-function Row({ item }: { item: Item }) {
-  const Icon = icons[item.icon as keyof typeof icons];
+const actionButton =
+  "flex size-7 items-center justify-center rounded-sm text-dark-400 transition-colors hover:bg-dark-800 hover:text-title";
+
+function Row({
+  work,
+  onOpen,
+}: {
+  work: ExperienceItem;
+  onOpen: () => void;
+}) {
+  const Icon = icons[work.icon];
+
   return (
     <div className="relative flex w-full flex-col items-center justify-center border-b border-b-dark-750 last:border-none">
       <div
@@ -31,42 +45,63 @@ function Row({ item }: { item: Item }) {
           "group-hover/list:opacity-60 hover:opacity-100!",
         )}
       >
-        <div className="relative z-3 flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-dark-850 ring-1 ring-dark-700">
-          <Icon className="size-4 text-dark-100" aria-hidden />
-        </div>
+        <button
+          type="button"
+          onClick={onOpen}
+          title={`Open ${work.name}`}
+          aria-label={`Open ${work.name} details`}
+          data-cuelume-press
+          className="relative z-3 flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-dark-850 text-dark-100 ring-1 ring-dark-700 transition-all hover:ring-dark-500 hover:brightness-125"
+        >
+          <Icon className="size-4" aria-hidden />
+        </button>
 
         <div className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-[11rem]">
-          <p className="text-base text-title">{item.name}</p>
-          {item.position ? (
-            <p className="text-sm text-description">{item.position}</p>
+          <p className="text-base text-title">{work.name}</p>
+          {work.position ? (
+            <p className="text-sm text-description">{work.position}</p>
           ) : null}
-          <p className="text-sm text-dark-400">{item.years.join(" / ")}</p>
+          <p className="text-sm text-dark-400">{work.years.join(" / ")}</p>
         </div>
 
         <p className="flex-1 text-sm text-description sm:pt-0.5">
-          {item.description}
+          {work.description}
         </p>
 
         <div className="flex shrink-0 flex-row gap-1 sm:flex-col">
-          <a
-            href={item.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Visit"
+          <button
+            type="button"
+            onClick={onOpen}
+            title="Open details"
+            aria-label={`Open ${work.name} details`}
             data-cuelume-press
-            className="flex size-7 items-center justify-center rounded-sm text-dark-400 transition-colors hover:bg-dark-800 hover:text-title"
+            className={cn(actionButton, "cursor-pointer")}
           >
-            <ArrowUpRight className="size-3.5" aria-hidden />
-          </a>
-          {"story" in item && item.story ? (
-            <Link
-              href={item.story}
-              title="Read story"
-              data-cuelume-press
-              className="flex size-7 items-center justify-center rounded-sm text-dark-400 transition-colors hover:bg-dark-800 hover:text-title"
-            >
-              <GalleryHorizontalEnd className="size-3.5" aria-hidden />
-            </Link>
+            <AppWindow className="size-3.5" aria-hidden />
+          </button>
+
+          {work.link ? (
+            isExternal(work.link.href) ? (
+              <a
+                href={work.link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={work.link.label}
+                data-cuelume-press
+                className={actionButton}
+              >
+                <ArrowUpRight className="size-3.5" aria-hidden />
+              </a>
+            ) : (
+              <Link
+                href={work.link.href}
+                title={work.link.label}
+                data-cuelume-press
+                className={actionButton}
+              >
+                <ArrowUpRight className="size-3.5" aria-hidden />
+              </Link>
+            )
           ) : null}
         </div>
       </div>
@@ -75,6 +110,8 @@ function Row({ item }: { item: Item }) {
 }
 
 export function WorkList() {
+  const [selected, setSelected] = useState<ExperienceItem | null>(null);
+
   return (
     <motion.section
       initial="hidden"
@@ -85,10 +122,19 @@ export function WorkList() {
     >
       <p className="text-base text-title">Experience</p>
       <div className="group/list flex w-full flex-col">
-        {experience.map((item) => (
-          <Row key={item.id} item={item} />
+        {experience.map((work) => (
+          <Row key={work.id} work={work} onOpen={() => setSelected(work)} />
         ))}
       </div>
+
+      <AnimatePresence>
+        {selected ? (
+          <WorkDetailPanel
+            work={selected}
+            onClose={() => setSelected(null)}
+          />
+        ) : null}
+      </AnimatePresence>
     </motion.section>
   );
 }
