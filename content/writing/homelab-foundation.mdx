@@ -1,0 +1,39 @@
+---
+title: Building a Cybersecurity Homelab
+summary: Designing an enterprise-style lab on VirtualBox — networking, Active Directory, and the path toward SIEM and detection engineering.
+date: "2026-03-01"
+kind: writeup
+tags:
+  - Homelab
+  - Active Directory
+  - Networking
+---
+
+## Why a homelab
+
+I wanted a controlled place to practice both sides of the fight: administer systems like a defender, then attack them like an adversary — without putting anyone else's network at risk. The [Homelab repo](https://github.com/gregory-dean/Homelab) tracks the build in public so the process itself becomes a portfolio artifact.
+
+## Architecture
+
+The lab runs on a Windows 11 host with Oracle VirtualBox:
+
+- Internal subnet `192.168.56.0/24` via host-only adapter
+- NAT for controlled outbound access
+- Mix of Windows Server 2022, Ubuntu Server, and Kali Linux guests
+
+## Current phases
+
+1. **Lab foundation and networking** — complete
+2. **AD identity and access** — complete
+3. **Log collection and SIEM onboarding** — in progress
+4. **Vulnerability management workflow** — planned
+5. **Attack simulation and detection** — planned
+6. **Linux hardening and monitoring** — planned
+
+## Tooling in play
+
+Wazuh, Sysmon, Nmap, Wireshark, Nessus/OpenVAS, Metasploit, and Burp Suite sit alongside Active Directory, DNS, and Group Policy. The goal isn't collecting logos — it's generating realistic telemetry and practicing the loop from exploit to detection to remediation.
+
+## What's next
+
+SIEM onboarding is the current focus. Once logs are trustworthy, attack simulation becomes useful instead of noisy. Follow the repo for phase writeups as they ship.
