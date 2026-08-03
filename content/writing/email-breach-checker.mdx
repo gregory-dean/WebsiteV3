@@ -1,0 +1,34 @@
+---
+title: Email Breach Checker CLI
+summary: A Python tool for bulk Have I Been Pwned lookups with structured CSV reporting for assessments and investigations.
+date: "2026-02-15"
+kind: project
+tags:
+  - Python
+  - OSINT
+  - HIBP
+---
+
+## Problem
+
+During assessments and investigations you often need to check whether a list of email addresses appears in known breaches. Doing that one-by-one in a browser doesn't scale, and ad-hoc scripts rarely produce clean artifacts for the report.
+
+## Approach
+
+[Email Breach Checker](https://github.com/gregory-dean/Email-Breach-Checker) is a small Python CLI that:
+
+- Reads emails from `.txt` or `.csv`
+- Queries the Have I Been Pwned API with polite rate limiting
+- Writes a grouped summary CSV
+- Logs failures separately so retries are easy
+
+## Usage sketch
+
+```bash
+export HIBP_API_KEY=your_api_key
+email-breach-checker examples/emails.txt --output results.csv
+```
+
+## Why it matters
+
+Breach exposure is a common thread across phishing simulations, user education, and incident triage. Automating the lookup keeps the analyst focused on interpretation — which accounts matter, which services leaked, what remediation looks like — instead of copy-paste.
