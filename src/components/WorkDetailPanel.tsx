@@ -3,6 +3,7 @@
 import { Building2, Shield, Wifi, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { ExperienceItem } from "@/data/site";
 import { cn } from "@/lib/cn";
 import { WorkGauge } from "@/components/WorkGauge";
@@ -18,7 +19,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 const container = {
   hidden: {},
   visible: {
-    transition: { delayChildren: 0.15, staggerChildren: 0.07 },
+    transition: { delayChildren: 0.12, staggerChildren: 0.06 },
   },
 };
 
@@ -56,16 +57,18 @@ export function WorkDetailPanel({
     };
   }, [onClose]);
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <motion.div key="work-detail" className="fixed inset-0 z-50">
       <motion.div
         aria-hidden
         onClick={onClose}
-        className="absolute inset-0 bg-dark-950/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-dark-950/45 backdrop-blur-xl"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.35, ease: EASE }}
+        transition={{ duration: 0.3, ease: EASE }}
       />
 
       <motion.aside
@@ -73,13 +76,14 @@ export function WorkDetailPanel({
         aria-modal="true"
         aria-label={`${work.name} details`}
         className={cn(
-          "absolute inset-y-0 right-0 flex w-full flex-col overflow-y-auto border-l border-dark-750 bg-dark-900",
-          "sm:w-[540px] lg:w-[600px]",
+          "absolute inset-y-0 right-0 flex w-full flex-col overflow-y-auto bg-dark-900 shadow-2xl shadow-dark-950/60",
+          "border-l border-dark-750",
+          "sm:w-[42%] sm:min-w-[440px]",
         )}
         initial={{ x: "100%" }}
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
-        transition={{ duration: 0.5, ease: EASE }}
+        transition={{ duration: 0.42, ease: EASE }}
       >
         <button
           type="button"
@@ -108,6 +112,7 @@ export function WorkDetailPanel({
                 {work.position} · {work.years.join(" / ")}
               </p>
             </div>
+            <div className="h-px w-full bg-dark-750" />
           </motion.div>
 
           {work.detail.summary.map((paragraph, i) => (
@@ -122,14 +127,14 @@ export function WorkDetailPanel({
 
           <motion.div
             variants={item}
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+            className="grid grid-cols-1 gap-4 lg:grid-cols-2"
           >
             {work.detail.stats.map((stat, i) => (
               <WorkGauge
                 key={`stat-${i}`}
                 stat={stat}
                 active
-                delay={0.35 + i * 0.12}
+                delay={0.3 + i * 0.12}
               />
             ))}
           </motion.div>
@@ -160,6 +165,7 @@ export function WorkDetailPanel({
           ))}
         </motion.div>
       </motion.aside>
-    </motion.div>
+    </motion.div>,
+    document.body,
   );
 }

@@ -60,11 +60,11 @@ export function WorkGauge({
   }, [active, count, stat.value, delay]);
 
   return (
-    <div className="flex flex-col items-center gap-4 rounded-2xl border border-dark-750 bg-dark-850/60 p-5">
+    <div className="flex flex-col items-center gap-4 rounded-2xl border border-dark-750 bg-dark-850/60 p-4">
       <div className="relative flex items-center justify-center">
         <svg
           viewBox={`0 0 ${SIZE} ${SIZE}`}
-          className="size-40 -rotate-90"
+          className="size-36 -rotate-90"
           fill="none"
         >
           <circle
@@ -125,13 +125,13 @@ export function WorkGauge({
           <span className="flex size-8 items-center justify-center rounded-full bg-dark-800 ring-1 ring-dark-700">
             <Activity className={cn("size-4", primaryColor)} aria-hidden />
           </span>
-          <span className="flex items-baseline gap-0.5 tabular-nums">
-            <motion.span className="text-2xl text-title">{display}</motion.span>
+          <span className="flex items-baseline gap-0.5 rounded-md bg-dark-800/70 px-2 py-0.5 tabular-nums ring-1 ring-dark-700/60">
+            <motion.span className="text-xl text-title">{display}</motion.span>
             {stat.unit ? (
               <span className="text-sm text-dark-400">{stat.unit}</span>
             ) : null}
           </span>
-          <span className="max-w-[7rem] text-center text-[0.7rem] leading-tight text-dark-400">
+          <span className="max-w-[6rem] text-center text-[0.65rem] leading-tight text-dark-400">
             {stat.sub}
           </span>
         </div>
