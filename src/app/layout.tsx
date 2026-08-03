@@ -24,11 +24,20 @@ export const metadata: Metadata = {
     url: site.url,
     siteName: site.name,
     type: "website",
+    images: [
+      {
+        url: "/og-social-preview.png",
+        width: 1280,
+        height: 640,
+        alt: site.title,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: site.title,
     description: site.description,
+    images: ["/og-social-preview.png"],
   },
 };
 
