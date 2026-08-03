@@ -58,19 +58,8 @@ export function Hero() {
         />{" "}
         focused on defending systems, clarifying risk, and building practical
         security work. <br />
-        Trained through Evolve Security Academy — fluent in{" "}
-        <EmphasizedLink
-          value="offense + defense"
-          active={step === 1}
-          href={site.links.github}
-        />{" "}
-        across networks, Active Directory, and{" "}
-        <EmphasizedLink
-          value="SOC tooling"
-          active={step === 2}
-          href="https://github.com/gregory-dean/Homelab"
-        />
-        .
+        Trained through Evolve Security Academy — fluent in offense + defense
+        across networks, Active Directory, and SOC tooling.
       </motion.p>
 
       <motion.div variants={revealBig} className="w-full">
