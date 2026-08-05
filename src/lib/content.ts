@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import type { WritingMeta, WritingPost } from "@/lib/types";
+import type { WritingMeta, WritingPost, WritingStatus } from "@/lib/types";
 
 export type { WritingMeta, WritingPost };
 export { formatDate } from "@/lib/types";
@@ -30,6 +30,14 @@ function normalizeDate(value: unknown): string {
   return String(value);
 }
 
+const STATUSES: readonly WritingStatus[] = ["active", "lab", "complete"];
+
+function parseStatus(value: unknown): WritingStatus | undefined {
+  return STATUSES.includes(value as WritingStatus)
+    ? (value as WritingStatus)
+    : undefined;
+}
+
 function parseMeta(data: Record<string, unknown>, slug: string): WritingMeta {
   return {
     slug,
@@ -41,6 +49,7 @@ function parseMeta(data: Record<string, unknown>, slug: string): WritingMeta {
     draft: Boolean(data.draft),
     cover: data.cover ? String(data.cover) : undefined,
     coverAlt: data.coverAlt ? String(data.coverAlt) : undefined,
+    status: parseStatus(data.status),
   };
 }
 

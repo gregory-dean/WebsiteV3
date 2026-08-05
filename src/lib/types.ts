@@ -1,3 +1,5 @@
+export type WritingStatus = "active" | "lab" | "complete";
+
 export type WritingMeta = {
   slug: string;
   title: string;
@@ -10,6 +12,8 @@ export type WritingMeta = {
   cover?: string;
   /** Alt text for the cover image. Falls back to the post title. */
   coverAlt?: string;
+  /** Project status badge shown next to the kind label. */
+  status?: WritingStatus;
 };
 
 export type WritingPost = WritingMeta & {

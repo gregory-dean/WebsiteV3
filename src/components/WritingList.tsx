@@ -4,6 +4,7 @@ import { GalleryHorizontalEnd } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { reveal } from "@/data/site";
+import { StatusBadge } from "@/components/StatusBadge";
 import { formatDate, type WritingMeta } from "@/lib/types";
 
 export function WritingList({ posts }: { posts: WritingMeta[] }) {
@@ -49,6 +50,7 @@ export function WritingList({ posts }: { posts: WritingMeta[] }) {
                   <span className="text-xs uppercase tracking-widest text-dark-400">
                     {post.kind}
                   </span>
+                  <StatusBadge status={post.status} />
                 </div>
                 <p className="mt-1 text-sm text-description">{post.summary}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-dark-400">
