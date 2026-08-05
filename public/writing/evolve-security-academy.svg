@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="30%" r="85%">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </radialGradient>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#glow)"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+
+  <g transform="translate(800 360)">
+    <path d="M 0 -190 L 150 -130 L 150 40 Q 150 150 0 210 Q -150 150 -150 40 L -150 -130 Z"
+      fill="#111111" stroke="#2e2e2e" stroke-width="3"/>
+    <path d="M 0 -150 L 112 -105 L 112 35 Q 112 122 0 168 Q -112 122 -112 35 L -112 -105 Z"
+      fill="none" stroke="#222222" stroke-width="2" stroke-dasharray="6 10"/>
+    <path d="M -60 10 L -15 60 L 75 -50" fill="none" stroke="#ffffff" stroke-width="12"
+      stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="800" y="700" text-anchor="middle" font-family="ui-monospace, Consolas, monospace" font-size="40" fill="#ffffff" letter-spacing="4">ESCP CERTIFIED</text>
+  <text x="800" y="760" text-anchor="middle" font-family="ui-monospace, Consolas, monospace" font-size="26" fill="#8a8a8a" letter-spacing="6">EVOLVE SECURITY ACADEMY &#183; 2025</text>
+</svg>

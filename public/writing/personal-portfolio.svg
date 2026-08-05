@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="35%" r="80%">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </radialGradient>
+    <pattern id="dots" width="56" height="56" patternUnits="userSpaceOnUse">
+      <circle cx="28" cy="28" r="2" fill="#2e2e2e"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#glow)"/>
+  <rect width="1600" height="900" fill="url(#dots)"/>
+
+  <g fill="none" stroke="#2e2e2e" stroke-width="2">
+    <circle cx="800" cy="400" r="180"/>
+    <circle cx="800" cy="400" r="240" stroke-dasharray="4 14"/>
+    <circle cx="800" cy="400" r="300" stroke="#222222" stroke-dasharray="2 18"/>
+  </g>
+  <g fill="#8a8a8a">
+    <circle cx="800" cy="220" r="5"/>
+    <circle cx="967" cy="330" r="4"/>
+    <circle cx="950" cy="530" r="5"/>
+    <circle cx="650" cy="550" r="4"/>
+    <circle cx="620" cy="310" r="5"/>
+    <circle cx="1040" cy="400" r="4"/>
+    <circle cx="560" cy="400" r="4"/>
+  </g>
+  <g fill="#ffffff">
+    <circle cx="800" cy="400" r="7"/>
+  </g>
+  <g stroke="#5a5a5a" stroke-width="1.5">
+    <line x1="800" y1="400" x2="967" y2="330"/>
+    <line x1="800" y1="400" x2="650" y2="550"/>
+    <line x1="800" y1="400" x2="620" y2="310"/>
+  </g>
+
+  <text x="800" y="740" text-anchor="middle" font-family="ui-monospace, Consolas, monospace" font-size="40" fill="#ffffff" letter-spacing="4">gregory-dean.com</text>
+  <text x="800" y="800" text-anchor="middle" font-family="ui-monospace, Consolas, monospace" font-size="26" fill="#8a8a8a" letter-spacing="6">PORTFOLIO &#183; LABS &#183; WRITING</text>
+</svg>

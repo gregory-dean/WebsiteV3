@@ -1,39 +1,46 @@
 ---
 title: Building a Cybersecurity Homelab
-summary: Designing an enterprise-style lab on VirtualBox — networking, Active Directory, and the path toward SIEM and detection engineering.
+summary: An enterprise-style lab on VirtualBox with Active Directory, Wazuh, and a documented path from networking fundamentals to detection engineering.
 date: "2026-03-01"
 kind: writeup
 tags:
   - Homelab
   - Active Directory
-  - Networking
+  - SIEM
+cover: /writing/homelab-diagram.png
+coverAlt: Cybersecurity homelab network diagram
 ---
 
 ## Why a homelab
 
-I wanted a controlled place to practice both sides of the fight: administer systems like a defender, then attack them like an adversary — without putting anyone else's network at risk. The [Homelab repo](https://github.com/gregory-dean/Homelab) tracks the build in public so the process itself becomes a portfolio artifact.
+I wanted a controlled place to practice both sides of the fight: administer systems like a defender, then attack them like an adversary, without putting anyone else's network at risk. The [Homelab repo](https://github.com/gregory-dean/Homelab) tracks the build in public so the process itself becomes a portfolio artifact.
 
 ## Architecture
 
-The lab runs on a Windows 11 host with Oracle VirtualBox:
+The lab simulates a small enterprise environment on a Windows 11 host with Oracle VirtualBox:
 
-- Internal subnet `192.168.56.0/24` via host-only adapter
-- NAT for controlled outbound access
-- Mix of Windows Server 2022, Ubuntu Server, and Kali Linux guests
+- Internal subnet `192.168.56.0/24` on a host-only adapter, with NAT per VM for controlled outbound access
+- **DC-01**, a Windows Server 2022 domain controller providing Active Directory and internal DNS
+- **WINCLIENT-01**, a domain-joined workstation for authentication and Group Policy validation
+- **KALI-01**, an off-domain attack machine for offensive testing
+- **UBUNTU-01**, a Linux server for services and log generation
+- **SIEM-01**, a Wazuh platform for log aggregation, detection, and alerting
 
-## Current phases
+## The build, phase by phase
 
-1. **Lab foundation and networking** — complete
-2. **AD identity and access** — complete
-3. **Log collection and SIEM onboarding** — in progress
-4. **Vulnerability management workflow** — planned
-5. **Attack simulation and detection** — planned
-6. **Linux hardening and monitoring** — planned
+1. **Lab foundation and networking**, complete
+2. **AD identity and access**, complete
+3. **Log collection and SIEM onboarding**, in progress
+4. **Vulnerability management workflow**, planned
+5. **Attack simulation and detection**, planned
+6. **Linux hardening and monitoring**, planned
+
+The SIEM phase is where the lab starts paying off. I'm deploying Wazuh agents alongside Sysmon to get real endpoint visibility into process creation, PowerShell activity, and lateral movement indicators, then tuning detection rules and alert thresholds so coverage stays high while false positives drop.
 
 ## Tooling in play
 
-Wazuh, Sysmon, Nmap, Wireshark, Nessus/OpenVAS, Metasploit, and Burp Suite sit alongside Active Directory, DNS, and Group Policy. The goal isn't collecting logos — it's generating realistic telemetry and practicing the loop from exploit to detection to remediation.
+Wazuh, Sysmon, Nmap, Wireshark, Nessus and OpenVAS, Metasploit, and Burp Suite sit alongside Active Directory, DNS, and Group Policy. The goal isn't collecting logos. It's generating realistic telemetry and practicing the full loop from exploit to detection to remediation.
 
 ## What's next
 
-SIEM onboarding is the current focus. Once logs are trustworthy, attack simulation becomes useful instead of noisy. Follow the repo for phase writeups as they ship.
+Once the logs are trustworthy, attack simulation becomes useful instead of noisy. Each phase gets its own writeup in the repo, including asset inventories, architecture docs, and the troubleshooting notes from everything that broke along the way. Those notes might be the most valuable part.

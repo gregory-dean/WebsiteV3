@@ -6,6 +6,10 @@ export type WritingMeta = {
   kind: "writeup" | "project" | "note";
   tags: string[];
   draft?: boolean;
+  /** Cover image path under /public, rendered in a fixed 16:9 frame. */
+  cover?: string;
+  /** Alt text for the cover image. Falls back to the post title. */
+  coverAlt?: string;
 };
 
 export type WritingPost = WritingMeta & {

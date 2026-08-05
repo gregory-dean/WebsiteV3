@@ -1,24 +1,41 @@
 ---
 title: Notes from Evolve Security Academy
-summary: Reflections on finishing the Evolve Security Academy apprenticeship and earning the ESCP — what stuck, and what I'm carrying into SOC and pentest work.
+summary: Reflections on completing the Evolve Security Academy bootcamp and earning the ESCP, including a live client penetration test with real findings.
 date: "2025-07-04"
 kind: note
 tags:
   - Training
   - ESCP
   - Career
+cover: /writing/evolve-security-academy.svg
+coverAlt: ESCP certification from Evolve Security Academy
 ---
 
 ## The short version
 
-I completed Evolve Security Academy's immersive cybersecurity apprenticeship and earned the ESCP certification. The program was built to feel like operations pressure, not slide decks — threat hunting, red teaming, malware analysis, and live incident response scenarios.
+After an intense and transformative few months, I completed the Evolve Security Academy bootcamp and earned my ESCP certification. From day one the program was immersive and demanding, designed to mirror the pace and pressure of real-world security operations rather than slide decks. I got hands-on time with threat hunting, red teaming, malware analysis, and live incident response scenarios, and it reshaped how I think about security, persistence, and problem solving.
+
+## The real engagement
+
+The part I'm proudest of wasn't a lab. Through Evolve, I supported a team based penetration test of a live client environment for the Drug Policy Alliance, working across reconnaissance, validation, and reporting.
+
+- Conducted internal and external assessments with Nmap, Nessus, Burp Suite, and Dirbuster
+- Identified and documented 24 validated vulnerabilities with CVSS based prioritization
+- Wrote findings that translated technical vulnerabilities into remediation steps both technical and non-technical stakeholders could act on
+- Built a Python script on the HIBP API to automate the client's email exposure checks for the report
+
+That last item eventually grew into my [Email Breach Checker](/writing/email-breach-checker) project.
 
 ## What changed in how I work
 
-- **Think in paths, not tools.** Attackers chain misconfigurations, weak controls, and human factors. Mapping those paths (often with MITRE ATT&CK) matters more than memorizing product UIs.
-- **Offense sharpens defense.** Running the exploit makes the detection gap obvious. That loop is now how I approach lab work.
+- **Think in paths, not tools.** Attackers chain misconfigurations, weak controls, and human factors. Mapping those paths, often with MITRE ATT&CK, matters more than memorizing product UIs.
+- **Offense sharpens defense.** Running the exploit makes the detection gap obvious. That loop is now how I approach all my lab work.
 - **Write for the team that has to live with the finding.** Clear remediation beats clever severity scores nobody can act on.
+
+## The people
+
+I'm grateful for the mentors, instructors, and teammates who pushed and supported me through the long nights of simulations and rapid-fire labs. Their guidance made the difference, and it set the bar for the kind of teammate I want to be.
 
 ## Where I'm headed
 
-I'm looking for SOC Analyst I or Junior Penetration Tester roles — places where I can keep practicing under experienced mentors while contributing real coverage. The homelab and public writeups are how I keep that muscle warm between interviews and engagements.
+This was a major step, but just the beginning. I'm continuing to build through my homelab and public projects, and I'm looking for SOC Analyst and Junior Penetration Tester roles where I can keep growing under experienced practitioners while contributing real coverage.
