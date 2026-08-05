@@ -2,6 +2,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { StatusBadge } from "@/components/StatusBadge";
 import { formatDate, getAllWriting, getWriting } from "@/lib/content";
 
 export function generateStaticParams() {
@@ -41,9 +42,12 @@ export default async function WritingPage({
           ← Projects, Writing & Labs
         </Link>
 
-        <p className="text-xs uppercase tracking-widest text-dark-400">
-          {post.kind} · {formatDate(post.date)}
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-xs uppercase tracking-widest text-dark-400">
+            {post.kind} · {formatDate(post.date)}
+          </p>
+          <StatusBadge status={post.status} />
+        </div>
         <h1 className="mt-2 text-2xl text-title sm:text-4xl">{post.title}</h1>
         <p className="mt-3 text-base text-description">{post.summary}</p>
 
