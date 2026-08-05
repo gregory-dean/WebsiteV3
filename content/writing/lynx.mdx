@@ -1,0 +1,50 @@
+---
+title: Lynx
+summary: A local-first secret scanner I'm building in Go to understand how credentials leak into repositories and how to catch them before they ship.
+date: "2026-07-18"
+kind: project
+tags:
+  - Go
+  - Secrets
+  - CI/CD
+cover: /writing/lynx.svg
+coverAlt: Lynx secret scanner terminal output
+---
+
+## Why I built it
+
+Every big breach writeup seems to include the same quiet detail: a credential that was sitting in a repository the whole time. I wanted to understand that failure mode from the inside. How do secrets actually end up in code? What do they look like once they're there? And what would it take to catch them before a push instead of after an incident?
+
+Instead of just reading about it, I started building [Lynx](https://github.com/gregory-dean/Lynx), a fast CLI that scans repositories and filesystems for leaked credentials, API keys, and high-entropy strings. It's an active project and it has taught me more about secret hygiene than any blog post could.
+
+## How it works
+
+Lynx layers a few detection strategies so that one weak signal doesn't decide the outcome:
+
+- Regex rules for known formats like AWS keys, GitHub tokens, Slack webhooks, Stripe keys, PEM private keys, JWTs, database URLs, and npm tokens
+- Shannon entropy filtering to flag random-looking strings that don't match a known pattern
+- Keyword proximity so a match near `token` or `secret` carries more weight than one in the middle of test fixtures
+
+One of my favorite parts is history scanning. Deleting a secret from the working tree doesn't remove it from git, so Lynx can walk historical blobs and report the first commit where a finding appeared:
+
+```bash
+lynx scan .              # scan the working tree
+lynx scan . --history    # scan git history for secrets that were "removed"
+```
+
+## Built for CI, not just laptops
+
+The tool is designed to sit in a pipeline and fail loudly:
+
+- Table output for humans, JSON and SARIF for machines and GitHub code scanning
+- Exit codes that CI understands: 0 clean, 1 findings, 2 error
+- Baselines to acknowledge known findings so new leaks stand out instead of drowning in noise
+- Custom rules in YAML for organization specific token formats
+
+Everything runs locally. There's no telemetry, and nothing leaves the machine unless you explicitly opt into live verification of a finding.
+
+## What I learned
+
+The biggest lesson is that leaks are a workflow problem, not a carelessness problem. Secrets slip in through example configs that become real configs, debug scripts that never got cleaned up, and history that everyone forgot about. Tooling that runs automatically, close to the developer, is what actually prevents the accident.
+
+That lesson feeds directly into my day job, where I'm implementing secret scanning as part of hardening internal development workflows. Building the scanner myself means I understand exactly what the guardrails can and can't see.

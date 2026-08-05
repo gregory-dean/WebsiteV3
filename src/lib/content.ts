@@ -39,6 +39,8 @@ function parseMeta(data: Record<string, unknown>, slug: string): WritingMeta {
     kind: (data.kind as WritingMeta["kind"]) ?? "writeup",
     tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
     draft: Boolean(data.draft),
+    cover: data.cover ? String(data.cover) : undefined,
+    coverAlt: data.coverAlt ? String(data.coverAlt) : undefined,
   };
 }
 

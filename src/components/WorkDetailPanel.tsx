@@ -1,7 +1,8 @@
 "use client";
 
-import { Building2, Shield, Wifi, X } from "lucide-react";
+import { ArrowRight, Building2, Shield, Wifi, X } from "lucide-react";
 import { motion } from "motion/react";
+import Image from "next/image";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import type { ExperienceItem } from "@/data/site";
@@ -125,19 +126,59 @@ export function WorkDetailPanel({
             </motion.p>
           ))}
 
-          <motion.div
-            variants={item}
-            className="grid grid-cols-1 gap-4 lg:grid-cols-2"
-          >
-            {work.detail.stats.map((stat, i) => (
-              <WorkGauge
-                key={`stat-${i}`}
-                stat={stat}
-                active
-                delay={0.3 + i * 0.12}
+          {work.detail.image ? (
+            <motion.div
+              variants={item}
+              className="overflow-hidden rounded-lg ring-1 ring-dark-700"
+            >
+              <Image
+                src={work.detail.image.src}
+                alt={work.detail.image.alt}
+                width={1600}
+                height={900}
+                className="aspect-[16/9] w-full object-cover"
               />
-            ))}
-          </motion.div>
+            </motion.div>
+          ) : null}
+
+          {work.detail.stats?.length ? (
+            <motion.div
+              variants={item}
+              className={cn(
+                "grid grid-cols-1 gap-2",
+                work.detail.stats.length > 1 && "lg:grid-cols-2",
+              )}
+            >
+              {work.detail.stats.map((stat, i) => (
+                <WorkGauge
+                  key={`stat-${i}`}
+                  stat={stat}
+                  active
+                  delay={0.3 + i * 0.12}
+                />
+              ))}
+            </motion.div>
+          ) : null}
+
+          {work.detail.highlights?.length ? (
+            <motion.ul
+              variants={item}
+              className="flex flex-col rounded-lg border border-dark-750 bg-dark-850/40"
+            >
+              {work.detail.highlights.map((highlight) => (
+                <li
+                  key={highlight}
+                  className="flex items-start gap-3 border-b border-dark-750 px-4 py-3 text-sm leading-relaxed text-description last:border-none"
+                >
+                  <ArrowRight
+                    className="mt-1 size-3.5 shrink-0 text-dark-400"
+                    aria-hidden
+                  />
+                  <span>{highlight}</span>
+                </li>
+              ))}
+            </motion.ul>
+          ) : null}
 
           {work.detail.sections.map((section, i) => (
             <motion.div
@@ -145,14 +186,7 @@ export function WorkDetailPanel({
               variants={item}
               className="flex flex-col gap-3"
             >
-              <div className="flex items-center gap-2">
-                <h3 className="text-base text-title">{section.heading}</h3>
-                {section.placeholder ? (
-                  <span className="rounded-full border border-dark-700 px-2 py-0.5 text-[0.65rem] tracking-wide text-dark-400 uppercase">
-                    Placeholder
-                  </span>
-                ) : null}
-              </div>
+              <h3 className="text-base text-title">{section.heading}</h3>
               {section.body.map((paragraph, j) => (
                 <p
                   key={`section-${i}-body-${j}`}

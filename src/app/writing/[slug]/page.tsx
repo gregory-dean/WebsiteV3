@@ -1,4 +1,5 @@
 import { MDXRemote } from "next-mdx-remote/rsc";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate, getAllWriting, getWriting } from "@/lib/content";
@@ -16,7 +17,7 @@ export async function generateMetadata({
   const post = getWriting(slug);
   if (!post) return {};
   return {
-    title: `${post.title} — Gregory Dean`,
+    title: `${post.title} · Gregory Dean`,
     description: post.summary,
   };
 }
@@ -57,7 +58,20 @@ export default async function WritingPage({
           ))}
         </div>
 
-        <div className="prose-cyber mt-10">
+        {post.cover ? (
+          <div className="mt-10 overflow-hidden rounded-lg ring-1 ring-dark-700">
+            <Image
+              src={post.cover}
+              alt={post.coverAlt ?? post.title}
+              width={1600}
+              height={900}
+              priority
+              className="aspect-[16/9] w-full object-cover"
+            />
+          </div>
+        ) : null}
+
+        <div className={post.cover ? "prose-cyber mt-8" : "prose-cyber mt-10"}>
           <MDXRemote source={post.content} />
         </div>
       </article>

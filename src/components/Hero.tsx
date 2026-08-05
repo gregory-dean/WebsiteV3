@@ -58,7 +58,7 @@ export function Hero() {
         />{" "}
         focused on defending systems, clarifying risk, and building practical
         security work. <br />
-        Trained through Evolve Security Academy — fluent in offense + defense
+        Trained through Evolve Security Academy, fluent in offense and defense
         across networks, Active Directory, and SOC tooling.
       </motion.p>
 

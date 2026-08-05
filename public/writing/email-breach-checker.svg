@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="0%" r="90%">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </radialGradient>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#glow)"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+
+  <rect x="280" y="180" width="1040" height="540" rx="14" fill="#111111" stroke="#2e2e2e" stroke-width="2"/>
+  <rect x="280" y="180" width="1040" height="56" rx="14" fill="#1a1a1a"/>
+  <rect x="280" y="222" width="1040" height="14" fill="#1a1a1a"/>
+  <circle cx="322" cy="208" r="8" fill="#2e2e2e"/>
+  <circle cx="350" cy="208" r="8" fill="#2e2e2e"/>
+  <circle cx="378" cy="208" r="8" fill="#2e2e2e"/>
+  <text x="800" y="215" text-anchor="middle" font-family="ui-monospace, Consolas, monospace" font-size="22" fill="#8a8a8a">email-breach-checker</text>
+
+  <g font-family="ui-monospace, Consolas, monospace" font-size="28">
+    <text x="336" y="308" fill="#8a8a8a">$ <tspan fill="#ffffff">email-breach-checker emails.txt</tspan></text>
+    <text x="336" y="368" fill="#5a5a5a">querying Have I Been Pwned, 6s between requests...</text>
+    <text x="336" y="428" fill="#8a8a8a">[ 1/48] a.reyes@example.org      <tspan fill="#ffffff">3 breaches</tspan></text>
+    <text x="336" y="480" fill="#8a8a8a">[ 2/48] j.okafor@example.org     <tspan fill="#ffffff">clean</tspan></text>
+    <text x="336" y="532" fill="#8a8a8a">[ 3/48] m.laurent@example.org    <tspan fill="#ffffff">7 breaches</tspan></text>
+    <text x="336" y="584" fill="#8a8a8a">[ 4/48] s.novak@example.org      <tspan fill="#ffffff">1 breach</tspan></text>
+    <text x="336" y="656" fill="#ffffff">summary written to results.csv <tspan fill="#5a5a5a">&#183; failures logged for retry</tspan></text>
+  </g>
+
+  <text x="800" y="810" text-anchor="middle" font-family="ui-monospace, Consolas, monospace" font-size="30" fill="#8a8a8a" letter-spacing="6">EMAIL BREACH CHECKER &#183; HIBP</text>
+</svg>

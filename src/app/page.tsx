@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CopyEmail } from "@/components/CopyEmail";
 import { Hero } from "@/components/Hero";
 import { Section } from "@/components/Section";
 import { SkillsSection } from "@/components/SkillsSection";
@@ -33,10 +34,10 @@ export default function HomePage() {
         <Section>
           <p className="text-base text-title">Education & training</p>
           <p className="text-base text-description [&>a]:text-title [&>a]:hover:text-white">
-            Evolve Security Academy — Cybersecurity Apprentice (2025), ESCP
+            Cybersecurity Apprentice at Evolve Security Academy (2025), ESCP
             certified. Hands-on labs across penetration testing, threat
-            hunting, malware analysis, and live incident response. Based in{" "}
-            {site.location}.
+            hunting, malware analysis, and live incident response. CompTIA
+            Security+ expected in 2026. Based in {site.location}.
           </p>
         </Section>
       </div>
@@ -57,11 +58,7 @@ export default function HomePage() {
             </a>
             . I&apos;m actively looking for SOC Analyst I or Junior Penetration
             Tester roles where I can contribute and grow under experienced
-            practitioners. Or email{" "}
-            <a data-cuelume-press href={site.links.email}>
-              {site.email}
-            </a>
-            .
+            practitioners. Or email <CopyEmail />.
           </p>
           <SocialLinks />
           <p className="pt-4 text-xs text-dark-400">

@@ -1,26 +1,29 @@
 ---
 title: Email Breach Checker CLI
-summary: A Python tool for bulk Have I Been Pwned lookups with structured CSV reporting for assessments and investigations.
+summary: A Python tool for bulk Have I Been Pwned lookups with structured CSV reporting, built during a live penetration test engagement.
 date: "2026-02-15"
 kind: project
 tags:
   - Python
   - OSINT
   - HIBP
+cover: /writing/email-breach-checker.svg
+coverAlt: Email Breach Checker terminal output
 ---
 
-## Problem
+## Where it came from
 
-During assessments and investigations you often need to check whether a list of email addresses appears in known breaches. Doing that one-by-one in a browser doesn't scale, and ad-hoc scripts rarely produce clean artifacts for the report.
+During the live penetration test I supported through Evolve Security Academy, we needed to check whether the client's email addresses appeared in known breaches. Doing that one address at a time in a browser doesn't scale, and ad-hoc scripts rarely produce clean artifacts for a report. I wrote the first version of this tool to automate those organizational exposure checks, and the output fed directly into the engagement report.
 
-## Approach
+Afterward I rebuilt it properly as [Email Breach Checker](https://github.com/gregory-dean/Email-Breach-Checker), a packaged Python CLI with tests, CI, and a real release structure.
 
-[Email Breach Checker](https://github.com/gregory-dean/Email-Breach-Checker) is a small Python CLI that:
+## What it does
 
-- Reads emails from `.txt` or `.csv`
-- Queries the Have I Been Pwned API with polite rate limiting
-- Writes a grouped summary CSV
-- Logs failures separately so retries are easy
+- Reads emails from `.txt` files or extracts them from any `.csv` with pattern matching, deduplicating as it goes
+- Queries the Have I Been Pwned API with polite rate limiting so the tool stays a good API citizen
+- Writes a grouped summary CSV with breach counts, titles, domains, dates, verification status, and compromised data types
+- Logs failed lookups separately with the HTTP status and error detail, so retries are easy
+- Returns meaningful exit codes so it can run unattended in scripts
 
 ## Usage sketch
 
@@ -31,4 +34,6 @@ email-breach-checker examples/emails.txt --output results.csv
 
 ## Why it matters
 
-Breach exposure is a common thread across phishing simulations, user education, and incident triage. Automating the lookup keeps the analyst focused on interpretation — which accounts matter, which services leaked, what remediation looks like — instead of copy-paste.
+Breach exposure is a common thread across phishing simulations, user education, and incident triage. Automating the lookup keeps the analyst focused on interpretation: which accounts matter, which services leaked, and what remediation looks like. The copy-paste part is exactly the part a script should own.
+
+It was also my first real lesson in the difference between a script that works and a tool other people can use. Packaging, input validation, failure logging, and tests turned a one-off engagement helper into something I'd hand to a teammate.

@@ -1,6 +1,6 @@
 export const site = {
   name: "Gregory Dean",
-  title: "Gregory Dean — Cybersecurity Practitioner",
+  title: "Gregory Dean · Cybersecurity Practitioner",
   description:
     "Gregory Dean is a cybersecurity practitioner focused on defending systems, clarifying risk, and building practical security work.",
   url: "https://gregory-dean.com",
@@ -12,7 +12,6 @@ export const site = {
     github: "https://github.com/gregory-dean",
     linkedin: "https://www.linkedin.com/in/gregorydean-/",
     website: "https://gregory-dean.com/",
-    email: "mailto:gregdeancyber@proton.me",
   },
 } as const;
 
@@ -114,16 +113,18 @@ export type WorkSection = {
   heading: string;
   /** Paragraphs of body copy. */
   body: string[];
-  /** Optional flag used to visually mark placeholder/template content. */
-  placeholder?: boolean;
 };
 
 /** The expandable detail content for a work item (razgraf-style panel). */
 export type WorkDetail = {
   /** Intro paragraphs shown under the header. */
   summary: string[];
-  /** Exactly two gauge widgets, mirroring the reference layout. */
-  stats: [WorkStat, WorkStat];
+  /** Optional cover image rendered in a fixed 16:9 frame. */
+  image?: { src: string; alt: string };
+  /** Optional gauge widgets (up to two). Omit when no real metric exists. */
+  stats?: WorkStat[];
+  /** Optional arrow-list of concrete things done in the role. */
+  highlights?: string[];
   /** Narrative sections (e.g. "The idea"). */
   sections: WorkSection[];
 };
@@ -151,49 +152,39 @@ export const experience: ExperienceItem[] = [
   {
     id: "kd-roofing",
     name: "KD Roofing",
-    position: "Business Systems Analyst",
-    years: ["2026 — Present"],
+    position: "Security Systems Analyst",
+    years: ["2026 to Present"],
     description:
-      "Drive operational improvements by bridging business processes and technology. Design internal software, perform IT and security assessments, and help teams adopt more effective systems.",
+      "I sit between business operations and the technology behind them. I build internal platforms, run security assessments, and harden the systems the company depends on every day.",
     icon: "building",
     link: null,
     detail: {
       summary: [
-        "KD Roofing is a regional roofing contractor where I sit between the operations team and the technology that keeps the business running.",
-        "I design internal software, run IT and security assessments, and help crews and office staff adopt systems that actually fit how they work.",
+        "KD Roofing is a regional roofing contractor, and I run point on the systems that keep it moving. The role covers everything from security assessments to internal software, so no two weeks look the same.",
+        "My focus is making the company measurably harder to compromise while making the day-to-day work easier. That means better data, tighter access, and tooling the team actually wants to use.",
       ],
-      stats: [
-        {
-          value: 1240,
-          sub: "assets tracked in the CMDB",
-          caption: "CMDB — single source of truth",
-          progress: 0.82,
-          tone: "accent",
-        },
-        {
-          value: 37,
-          unit: "%",
-          sub: "less manual data entry",
-          caption: "Process automation",
-          progress: 0.37,
-          tone: "neutral",
-        },
+      highlights: [
+        "Building Keystone, an internal CMDB platform that gives the company one accurate view of its assets",
+        "Completed an internal security audit covering identity and access across the whole network",
+        "Configured security rules and controls across Google Workspace and Microsoft 365",
+        "Building agentic services that take repetitive steps out of everyday workflows",
+        "Writing technical and workplace SOPs so processes survive beyond one person's memory",
+        "Configuring devices and IT equipment for office and field teams",
+        "Day-to-day troubleshooting and phishing analysis",
       ],
       sections: [
         {
-          heading: "CMDB software",
-          placeholder: true,
+          heading: "Keystone, the internal CMDB",
           body: [
-            "Placeholder — this is where I'll highlight the custom CMDB (Configuration Management Database) I built for KD Roofing.",
-            "The write-up will cover the data model for people, hardware, vehicles and software, the relationships between them, and how the tool became the operational source of truth for the business.",
-            "Swap this copy (and the gauges above) for the real story, screenshots, and metrics when ready.",
+            "Most process problems here were really data problems. The same information lived in spreadsheets, inboxes, and whiteboards, and none of it agreed. Keystone is the internal CMDB platform I am building to model that information once and keep it accurate.",
+            "It is becoming the operational source of truth for people, hardware, and software, which also makes the security work easier. You cannot protect assets you cannot see.",
           ],
         },
         {
-          heading: "The idea",
+          heading: "Security work",
           body: [
-            "Most process problems here were really data problems — the same information re-entered across spreadsheets, inboxes, and whiteboards.",
-            "The plan is to model that information once, keep it accurate, and let the software do the reconciling so the team can focus on the work instead of the paperwork.",
+            "I completed an identity and access audit across the internal network, then used what I found to tighten security rules in both the Google and Microsoft workspaces.",
+            "The rest is steady practice: phishing analysis, device hardening, and SOPs that make the secure path the easy path.",
           ],
         },
       ],
@@ -205,38 +196,53 @@ export const experience: ExperienceItem[] = [
     position: "Cybersecurity Apprentice",
     years: ["2025"],
     description:
-      "Immersive offensive and defensive training across penetration testing, threat detection, incident response, Active Directory, and security operations. Earned ESCP certification.",
+      "Immersive offensive and defensive training across penetration testing, threat detection, incident response, and security operations. Earned the ESCP certification.",
     icon: "shield",
     link: { href: "/writing/evolve-security-academy", label: "Read my notes" },
     detail: {
       summary: [
-        "Evolve Security Academy is an apprenticeship-style program that trains practitioners through hands-on offensive and defensive labs rather than slideware.",
-        "I worked across penetration testing, threat detection, incident response, and Active Directory, and earned the ESCP certification.",
+        "Evolve Security Academy is an apprenticeship style program built around hands-on labs instead of slide decks. I trained across both offense and defense and earned the Evolve Security Certified Professional (ESCP) certification.",
+        "The program ended with the real thing: a team based penetration test for the Drug Policy Alliance, a live client environment with real stakes and real reporting.",
       ],
       stats: [
         {
-          value: 320,
-          unit: "hrs",
-          sub: "hands-on lab time",
-          caption: "Offense + defense labs",
-          progress: 0.9,
+          value: 24,
+          sub: "Validated findings from a live client engagement",
+          caption: "Penetration test",
+          progress: 1,
           tone: "accent",
         },
         {
-          value: 100,
-          unit: "%",
-          sub: "ESCP exam completed",
-          caption: "Certified practitioner",
-          progress: 1,
+          value: 7,
+          unit: "mo",
+          sub: "Hands-on offense and defense apprenticeship",
+          caption: "Lab immersion",
+          progress: 0.58,
           tone: "neutral",
         },
       ],
+      highlights: [
+        "Supported a live penetration test for the Drug Policy Alliance across recon, validation, and reporting",
+        "Identified and documented 24 validated vulnerabilities with CVSS based prioritization",
+        "Delivered written findings that both technical and non-technical stakeholders could act on",
+        "Built a Python tool on the HIBP API to automate email exposure checks for the engagement report",
+        "Created SIEM dashboards in Splunk and ELK and mapped log findings to MITRE ATT&CK",
+        "Analyzed network traffic with Wireshark and Zeek and tested web apps against the OWASP Top 10",
+        "Built AWS lab environments with segmented subnets and applied NIST CSF, CIS Controls, and ISO 27001",
+      ],
       sections: [
         {
-          heading: "The idea",
+          heading: "The Drug Policy Alliance engagement",
           body: [
-            "Security clicks when you attack and defend the same system — so the labs pushed both sides until the concepts stuck.",
-            "I kept detailed notes throughout; the arrow on this row links to those write-ups.",
+            "The capstone was a team based penetration test of a live client environment, run through Evolve. I worked across the internal and external assessments using Nmap, Nessus, Burp Suite, and Dirbuster.",
+            "We validated 24 vulnerabilities, prioritized them with CVSS, and wrote remediation guidance the client could actually execute. Translating technical findings for non-technical stakeholders turned out to be half the job.",
+          ],
+        },
+        {
+          heading: "What stuck",
+          body: [
+            "Security clicks when you attack and defend the same system, so the labs pushed both sides until the concepts stuck.",
+            "I kept detailed notes throughout. The arrow on this row links to those write-ups.",
           ],
         },
       ],
@@ -246,39 +252,39 @@ export const experience: ExperienceItem[] = [
     id: "soiltech",
     name: "Soiltech Wireless",
     position: "IT Technician",
-    years: ["2024 — 2026"],
+    years: ["2024 to 2026"],
     description:
-      "Technical support for users, systems, and wireless infrastructure. Diagnosed hardware and software issues and kept day-to-day operations reliable.",
+      "Technical support for users, systems, and wireless infrastructure. I imaged and configured 50+ endpoint devices and kept day-to-day operations dependable.",
     icon: "wifi",
     link: { href: "https://www.soiltechwireless.com/", label: "Visit Soiltech Wireless" },
     detail: {
       summary: [
-        "Soiltech Wireless builds rugged sensors and wireless telemetry for the field, so reliable day-to-day IT is what keeps the operation moving.",
-        "I supported users, systems, and wireless infrastructure — diagnosing hardware and software issues and keeping operations dependable.",
+        "Soiltech Wireless builds rugged sensors and wireless telemetry for agriculture, so dependable IT is what keeps the field data flowing.",
+        "I handled support across users, systems, and wireless infrastructure, and I used the role to build a real security baseline instead of just closing tickets.",
       ],
       stats: [
         {
-          value: 98,
-          unit: "%",
-          sub: "systems uptime maintained",
-          caption: "Reliable operations",
-          progress: 0.98,
+          value: 50,
+          unit: "+",
+          sub: "Imaged, configured, and diagnosed across a distributed environment",
+          caption: "Endpoint fleet",
+          progress: 0.85,
           tone: "accent",
         },
-        {
-          value: 450,
-          sub: "support tickets resolved",
-          caption: "User + hardware support",
-          progress: 0.7,
-          tone: "neutral",
-        },
+      ],
+      highlights: [
+        "Imaged, configured, and diagnosed 50+ endpoint devices across a distributed environment",
+        "Applied hardening baselines and access control configurations to keep systems defensible",
+        "Assisted with patch management and baseline endpoint security configuration",
+        "Developed and maintained SOPs, network diagrams, and asset documentation",
+        "Resolved system and network issues while keeping change documentation current",
       ],
       sections: [
         {
           heading: "The idea",
           body: [
-            "Good IT support is mostly about removing friction before people notice it.",
-            "The goal was steady infrastructure and fast fixes so the field and office teams never had to think about their tools.",
+            "Good IT support is mostly about removing friction before anyone notices it. Steady infrastructure and fast fixes meant the field and office teams never had to think about their tools.",
+            "The documentation habit I built here, with SOPs, diagrams, and asset records, carried straight into my security work.",
           ],
         },
       ],

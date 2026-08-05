@@ -1,8 +1,9 @@
 "use client";
 
-import { Mail, Radio } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Check, Mail, Radio } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { site } from "@/data/site";
+import { copyTextToClipboard } from "@/lib/clipboard";
 import { applyTheme, DEFAULT_THEME, readStoredTheme } from "@/lib/theme";
 import type { ThemeId } from "@/data/themes";
 
@@ -48,15 +49,23 @@ const items = [
     href: site.links.linkedin,
     icon: LinkedInIcon,
   },
-  {
-    title: site.email,
-    href: site.links.email,
-    icon: Mail,
-  },
 ] as const;
 
 export function SocialLinks() {
   const [theme, setTheme] = useState<ThemeId>(DEFAULT_THEME);
+  const [copied, setCopied] = useState(false);
+  const copiedTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    return () => window.clearTimeout(copiedTimer.current);
+  }, []);
+
+  const copyEmail = async () => {
+    if (!(await copyTextToClipboard(site.email))) return;
+    setCopied(true);
+    window.clearTimeout(copiedTimer.current);
+    copiedTimer.current = window.setTimeout(() => setCopied(false), 1800);
+  };
 
   useEffect(() => {
     const current = readStoredTheme();
@@ -92,6 +101,34 @@ export function SocialLinks() {
           </div>
         </a>
       ))}
+      <div className="relative">
+        <button
+          type="button"
+          title={`Copy ${site.email}`}
+          aria-label={`Copy email address ${site.email}`}
+          onClick={copyEmail}
+          className="rounded-sm text-dark-400 hover:text-title"
+        >
+          <div
+            data-cuelume-press
+            className="flex size-8 cursor-pointer items-center justify-center rounded-sm transition-colors hover:bg-dark-800"
+          >
+            {copied ? (
+              <Check className="size-4 text-accent" />
+            ) : (
+              <Mail className="size-4" />
+            )}
+          </div>
+        </button>
+        <span
+          aria-live="polite"
+          className={`pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 rounded-sm bg-dark-800 px-2 py-0.5 text-xs whitespace-nowrap text-title ring-1 ring-dark-700 transition-all duration-200 ${
+            copied ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
+          }`}
+        >
+          Copied
+        </span>
+      </div>
       <button
         type="button"
         title={signalOn ? "Return to mono" : "Signal"}

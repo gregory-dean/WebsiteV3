@@ -3,7 +3,7 @@ import { WritingList } from "@/components/WritingList";
 import { getAllWriting } from "@/lib/content";
 
 export const metadata = {
-  title: "Projects, Writing & Labs — Gregory Dean",
+  title: "Projects, Writing & Labs · Gregory Dean",
   description:
     "Projects, labs, and writeups by Gregory Dean.",
 };
