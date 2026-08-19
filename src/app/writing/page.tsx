@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { WritingList } from "@/components/WritingList";
+import { WritingGallery } from "@/components/WritingGallery";
 import { getAllWriting } from "@/lib/content";
 
 export const metadata = {
@@ -13,14 +13,14 @@ export default function WritingIndexPage() {
 
   return (
     <main className="flex w-full flex-col items-center gap-8 pt-10 pb-40 sm:gap-16 sm:pt-20">
-      <div className="mx-auto flex w-full max-w-2xl flex-col items-start px-3 sm:px-6 md:px-0">
+      <div className="mx-auto flex w-full max-w-4xl flex-col items-start px-3 sm:px-6 md:px-8">
         <Link
           href="/"
           className="mb-8 text-sm text-dark-400 transition-colors hover:text-title"
         >
           ← Home
         </Link>
-        <WritingList posts={posts} />
+        <WritingGallery posts={posts} />
       </div>
     </main>
   );
