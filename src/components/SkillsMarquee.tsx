@@ -14,18 +14,19 @@ function Row({
 }) {
   const loop = [...items, ...items];
   return (
-    <div className="relative flex overflow-hidden py-1">
+    <div className="group/row relative flex overflow-hidden py-1">
       <div
         className={cn(
           "flex w-max gap-2",
           reverse ? "animate-marquee-reverse" : "animate-marquee",
+          "group-hover/row:[animation-play-state:paused]",
           durationClass,
         )}
       >
         {loop.map((item, i) => (
           <span
             key={`${item}-${i}`}
-            className="shrink-0 rounded-md bg-dark-850 px-3 py-1 text-sm text-title ring-1 ring-dark-500"
+            className="shrink-0 rounded-md bg-dark-850 px-3 py-1 text-sm text-title ring-1 ring-dark-500 transition-colors hover:bg-dark-800 hover:ring-dark-400"
           >
             {item}
           </span>
