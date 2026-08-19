@@ -23,16 +23,35 @@ export function Hero() {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    const started = performance.now();
+    let elapsed = 0;
+    let last = performance.now();
+    let hidden = document.hidden;
     let frame = 0;
+
+    const onVisibility = () => {
+      hidden = document.hidden;
+      last = performance.now();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     const tick = (now: number) => {
-      const elapsed = (now - started) / 1000 - DURATION_TOTAL_REVEAL;
-      const next = Math.max(0, Math.floor(elapsed / 6));
-      setStep(next % 3);
+      const dt = Math.min((now - last) / 1000, 1 / 30);
+      last = now;
+      if (!hidden) {
+        elapsed += dt;
+        const next = Math.max(
+          0,
+          Math.floor((elapsed - DURATION_TOTAL_REVEAL) / 6),
+        );
+        setStep(next % 3);
+      }
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, []);
 
   return (

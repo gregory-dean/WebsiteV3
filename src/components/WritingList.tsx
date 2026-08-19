@@ -1,6 +1,6 @@
 "use client";
 
-import { GalleryHorizontalEnd } from "lucide-react";
+import { ArrowRight, GalleryHorizontalEnd } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { reveal } from "@/data/site";
@@ -18,9 +18,18 @@ export function WritingList({ posts }: { posts: WritingMeta[] }) {
     >
       <div className="flex items-baseline justify-between gap-4">
         <p className="text-base text-title">Projects, Writing & Labs</p>
-        <p className="text-sm text-dark-400">
-          Homelab work, tools, and writeups
-        </p>
+        <Link
+          href="/writing"
+          data-cuelume-press
+          aria-label="View all projects, writing, and labs"
+          className="group/all inline-flex items-center gap-1 text-sm text-dark-400 transition-colors hover:text-title"
+        >
+          View all
+          <ArrowRight
+            className="size-3.5 transition-transform group-hover/all:translate-x-0.5"
+            aria-hidden
+          />
+        </Link>
       </div>
 
       <div className="flex w-full flex-col">
