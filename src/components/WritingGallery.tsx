@@ -145,7 +145,7 @@ export function WritingGallery({ posts }: { posts: WritingMeta[] }) {
       <div className="flex flex-col gap-2">
         <p className="text-base text-title">Projects, Writing & Labs</p>
         <p className="text-sm text-description">
-          Homelab work, tools, and writeups — pictured, not just listed.
+          Homelab work, tools, and writeups
         </p>
       </div>
 
