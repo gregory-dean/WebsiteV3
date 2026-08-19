@@ -470,23 +470,20 @@ export function ParticleScene({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mouse = useRef<MouseState>({ x: 0, y: 0, active: 0 });
-  const clockRef = useRef<ClockApi | null>(null);
-  if (!clockRef.current) {
-    clockRef.current = createMorphClock(delay, morphSeconds);
-  }
-  const clock = clockRef.current;
+  const clock = useMemo(
+    () => createMorphClock(delay, morphSeconds),
+    [delay, morphSeconds],
+  );
 
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [dpr, setDpr] = useState(1);
 
   useEffect(() => {
-    const clock = clockRef.current;
-    if (!clock) return;
     const sync = () => clock.setPaused(document.hidden);
     sync();
     document.addEventListener("visibilitychange", sync);
     return () => document.removeEventListener("visibilitychange", sync);
-  }, []);
+  }, [clock]);
 
   useEffect(() => {
     setDpr(Math.min(window.devicePixelRatio || 1, 2));
@@ -515,7 +512,7 @@ export function ParticleScene({
       }}
       aria-label="Interactive particle field morphing between Gregory Dean branding and security tooling"
     >
-      {size.width > 0 && size.height > 0 && clock ? (
+      {size.width > 0 && size.height > 0 ? (
         <Canvas
           orthographic
           camera={{ position: [0, 0, 100], zoom: 1, near: 0.1, far: 1000 }}
