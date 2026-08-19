@@ -251,6 +251,8 @@ type MouseState = { x: number; y: number; active: number };
 type ClockApi = {
   targetStep: () => number;
   seconds: () => number;
+  advance: (dt: number) => void;
+  setPaused: (paused: boolean) => void;
 };
 
 function Particles({
@@ -378,10 +380,11 @@ function Particles({
   }, [material]);
 
   useFrame((_, delta) => {
+    const dt = Math.min(delta, 1 / 30);
+    clock.advance(dt);
     if (!scene || !geometry) return;
     const uniforms = material.uniforms;
     const frames = scene.positions.length;
-    const dt = Math.min(delta, 1 / 30);
     uniforms.uTime.value += dt;
 
     const target = clock.targetStep();
@@ -443,13 +446,17 @@ function Particles({
   );
 }
 
-function createMorphClock(delay: number, morph: number, steps: number): ClockApi {
-  const start = performance.now() / 1000;
+function createMorphClock(delay: number, morph: number): ClockApi {
+  let elapsed = 0;
+  let paused = false;
   return {
-    seconds: () => performance.now() / 1000 - start,
-    targetStep: () => {
-      const elapsed = performance.now() / 1000 - start - delay;
-      return Math.max(0, Math.floor(elapsed / morph));
+    seconds: () => elapsed,
+    targetStep: () => Math.max(0, Math.floor((elapsed - delay) / morph)),
+    advance: (dt) => {
+      if (!paused) elapsed += dt;
+    },
+    setPaused: (next) => {
+      paused = next;
     },
   };
 }
@@ -463,17 +470,20 @@ export function ParticleScene({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mouse = useRef<MouseState>({ x: 0, y: 0, active: 0 });
-  const clockRef = useRef<ClockApi | null>(null);
-  if (!clockRef.current) {
-    clockRef.current = createMorphClock(
-      delay,
-      morphSeconds,
-      MORPH_IMAGES.length,
-    );
-  }
+  const clock = useMemo(
+    () => createMorphClock(delay, morphSeconds),
+    [delay, morphSeconds],
+  );
 
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [dpr, setDpr] = useState(1);
+
+  useEffect(() => {
+    const sync = () => clock.setPaused(document.hidden);
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, [clock]);
 
   useEffect(() => {
     setDpr(Math.min(window.devicePixelRatio || 1, 2));
@@ -502,7 +512,7 @@ export function ParticleScene({
       }}
       aria-label="Interactive particle field morphing between Gregory Dean branding and security tooling"
     >
-      {size.width > 0 && size.height > 0 && (
+      {size.width > 0 && size.height > 0 ? (
         <Canvas
           orthographic
           camera={{ position: [0, 0, 100], zoom: 1, near: 0.1, far: 1000 }}
@@ -515,10 +525,10 @@ export function ParticleScene({
             dpr={dpr}
             images={MORPH_IMAGES}
             mouse={mouse}
-            clock={clockRef.current}
+            clock={clock}
           />
         </Canvas>
-      )}
+      ) : null}
     </div>
   );
 }
