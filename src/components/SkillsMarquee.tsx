@@ -2,9 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { skillsRows } from "@/data/site";
-
-const DURATION_FORWARD = 28;
-const DURATION_REVERSE = 32;
+import { cn } from "@/lib/cn";
 
 function SkillPills({
   items,
@@ -15,7 +13,7 @@ function SkillPills({
 }) {
   return (
     <div
-      className="flex gap-2 pr-2"
+      className="flex shrink-0 gap-2 pr-2"
       aria-hidden={ariaHidden || undefined}
     >
       {items.map((item, i) => (
@@ -33,18 +31,12 @@ function SkillPills({
 function Row({
   items,
   reverse = false,
-  duration,
 }: {
   items: readonly string[];
   reverse?: boolean;
-  duration: number;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const copyRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef(0);
-  const halfRef = useRef(0);
-  const pausedRef = useRef(false);
-
+  const hoveringRef = useRef(false);
   const [reduceMotion, setReduceMotion] = useState(false);
 
   useEffect(() => {
@@ -56,59 +48,26 @@ function Row({
   }, []);
 
   useEffect(() => {
-    if (reduceMotion) return;
     const track = trackRef.current;
-    const copy = copyRef.current;
-    if (!track || !copy) return;
+    if (!track) return;
 
-    const measure = () => {
-      const half = copy.offsetWidth;
-      if (half <= 0) return;
-      const wasUnmeasured = halfRef.current === 0;
-      halfRef.current = half;
-      if (wasUnmeasured && reverse) {
-        offsetRef.current = -half;
-        track.style.transform = `translate3d(${offsetRef.current}px,0,0)`;
-      }
+    const apply = () => {
+      const paused = hoveringRef.current || document.hidden || reduceMotion;
+      track.style.animationPlayState = paused ? "paused" : "running";
     };
 
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(copy);
+    apply();
+    document.addEventListener("visibilitychange", apply);
+    return () => document.removeEventListener("visibilitychange", apply);
+  }, [reduceMotion]);
 
-    let last = performance.now();
-    let frame = 0;
-    const tick = (now: number) => {
-      const dt = Math.min((now - last) / 1000, 1 / 30);
-      last = now;
-      const half = halfRef.current;
-      if (
-        half > 0 &&
-        !pausedRef.current &&
-        !document.hidden
-      ) {
-        const speed = half / duration;
-        const dir = reverse ? 1 : -1;
-        let next = offsetRef.current + dir * speed * dt;
-        next = ((next % half) + half) % half - half;
-        offsetRef.current = next;
-        track.style.transform = `translate3d(${next}px,0,0)`;
-      }
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-
-    const onVisibility = () => {
-      last = performance.now();
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      ro.disconnect();
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [duration, reduceMotion, reverse]);
+  const setHovering = (hovering: boolean) => {
+    hoveringRef.current = hovering;
+    const track = trackRef.current;
+    if (!track) return;
+    track.style.animationPlayState =
+      hovering || document.hidden || reduceMotion ? "paused" : "running";
+  };
 
   if (reduceMotion) {
     return (
@@ -120,21 +79,18 @@ function Row({
 
   return (
     <div
-      className="relative flex overflow-hidden py-1"
-      onPointerEnter={() => {
-        pausedRef.current = true;
-      }}
-      onPointerLeave={() => {
-        pausedRef.current = false;
-      }}
+      className="relative overflow-hidden py-1"
+      onPointerEnter={() => setHovering(true)}
+      onPointerLeave={() => setHovering(false)}
     >
       <div
         ref={trackRef}
-        className="flex w-max will-change-transform"
+        className={cn(
+          "flex w-max min-w-max shrink-0",
+          reverse ? "animate-marquee-reverse" : "animate-marquee",
+        )}
       >
-        <div ref={copyRef}>
-          <SkillPills items={items} />
-        </div>
+        <SkillPills items={items} />
         <SkillPills items={items} ariaHidden />
       </div>
     </div>
@@ -154,10 +110,10 @@ export function SkillsMarquee() {
       />
 
       <div className="flex h-full flex-col justify-center gap-2">
-        <Row items={skillsRows[0]} duration={DURATION_FORWARD} />
-        <Row items={skillsRows[1]} reverse duration={DURATION_REVERSE} />
-        <Row items={skillsRows[2]} duration={DURATION_FORWARD} />
-        <Row items={skillsRows[3]} reverse duration={DURATION_REVERSE} />
+        <Row items={skillsRows[0]} />
+        <Row items={skillsRows[1]} reverse />
+        <Row items={skillsRows[2]} />
+        <Row items={skillsRows[3]} reverse />
       </div>
     </div>
   );
