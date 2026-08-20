@@ -2,33 +2,11 @@
 
 import { ArrowRight, GalleryHorizontalEnd } from "lucide-react";
 import { motion } from "motion/react";
-import Image from "next/image";
 import Link from "next/link";
 import { reveal } from "@/data/site";
 import { StatusBadge } from "@/components/StatusBadge";
 import { cn } from "@/lib/cn";
 import { formatDate, type WritingMeta } from "@/lib/types";
-
-function CoverThumb({ post }: { post: WritingMeta }) {
-  return (
-    <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-dark-850 ring-1 ring-dark-700">
-      {post.cover ? (
-        <Image
-          src={post.cover}
-          alt=""
-          width={80}
-          height={80}
-          className="size-full object-cover"
-        />
-      ) : (
-        <GalleryHorizontalEnd
-          className="size-4 text-dark-100"
-          aria-hidden
-        />
-      )}
-    </div>
-  );
-}
 
 export function WritingList({ posts }: { posts: WritingMeta[] }) {
   return (
@@ -72,7 +50,12 @@ export function WritingList({ posts }: { posts: WritingMeta[] }) {
                 "group-hover/list:opacity-60 hover:opacity-100!",
               )}
             >
-              <CoverThumb post={post} />
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-dark-850 ring-1 ring-dark-700">
+                <GalleryHorizontalEnd
+                  className="size-4 text-dark-100"
+                  aria-hidden
+                />
+              </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <p className="text-base text-title group-hover:text-white">
