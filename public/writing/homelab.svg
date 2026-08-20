@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <radialGradient id="homelab-glow" cx="50%" cy="0%" r="90%">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </radialGradient>
+    <pattern id="homelab-grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#homelab-glow)"/>
+  <rect width="1600" height="900" fill="url(#homelab-grid)"/>
+
+  <rect x="280" y="180" width="1040" height="540" rx="14" fill="#111111" stroke="#2e2e2e" stroke-width="2"/>
+  <rect x="280" y="180" width="1040" height="56" rx="14" fill="#1a1a1a"/>
+  <rect x="280" y="222" width="1040" height="14" fill="#1a1a1a"/>
+  <circle cx="322" cy="208" r="8" fill="#2e2e2e"/>
+  <circle cx="350" cy="208" r="8" fill="#2e2e2e"/>
+  <circle cx="378" cy="208" r="8" fill="#2e2e2e"/>
+  <text x="800" y="215" text-anchor="middle" font-family="ui-monospace, Consolas, monospace" font-size="22" fill="#8a8a8a">homelab</text>
+
+  <g font-family="ui-monospace, Consolas, monospace" font-size="26">
+    <text x="336" y="300" fill="#8a8a8a">$ <tspan fill="#ffffff">lab status --subnet 192.168.56.0/24</tspan></text>
+    <text x="336" y="352" fill="#5a5a5a">host-only adapter · NAT per VM · VirtualBox</text>
+    <text x="336" y="416" fill="#b0b0b0">HOST            ROLE                 STATUS</text>
+    <text x="336" y="468" fill="#8a8a8a">DC-01           Active Directory     <tspan fill="#ffffff">up</tspan></text>
+    <text x="336" y="516" fill="#8a8a8a">WINCLIENT-01    workstation / GPO    <tspan fill="#ffffff">up</tspan></text>
+    <text x="336" y="564" fill="#8a8a8a">KALI-01         offensive testing    <tspan fill="#ffffff">up</tspan></text>
+    <text x="336" y="612" fill="#8a8a8a">SIEM-01         Wazuh detections     <tspan fill="#ffffff">up</tspan></text>
+    <text x="336" y="668" fill="#ffffff">4/4 nodes healthy <tspan fill="#5a5a5a">&#183; Sysmon onboarded &#183; lab in progress</tspan></text>
+  </g>
+
+  <text x="800" y="810" text-anchor="middle" font-family="ui-monospace, Consolas, monospace" font-size="30" fill="#8a8a8a" letter-spacing="6">HOMELAB &#183; AD &#183; WAZUH</text>
+</svg>
