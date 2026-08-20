@@ -119,13 +119,15 @@ export function EmphasizedLink({
   href: string;
   active: boolean;
 }) {
+  const external = /^https?:\/\//.test(href);
   return (
     <span className="relative">
       <motion.a
         data-cuelume-press
         href={href}
-        target="_blank"
-        rel="noopener noreferrer"
+        {...(external
+          ? { target: "_blank", rel: "noopener noreferrer" }
+          : {})}
         className="cursor-pointer text-title hover:text-white"
       >
         {value}

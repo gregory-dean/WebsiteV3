@@ -2,19 +2,43 @@
 
 import { ArrowRight, GalleryHorizontalEnd } from "lucide-react";
 import { motion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
 import { reveal } from "@/data/site";
 import { StatusBadge } from "@/components/StatusBadge";
+import { cn } from "@/lib/cn";
 import { formatDate, type WritingMeta } from "@/lib/types";
+
+function CoverThumb({ post }: { post: WritingMeta }) {
+  return (
+    <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-dark-850 ring-1 ring-dark-700">
+      {post.cover ? (
+        <Image
+          src={post.cover}
+          alt=""
+          width={80}
+          height={80}
+          className="size-full object-cover"
+        />
+      ) : (
+        <GalleryHorizontalEnd
+          className="size-4 text-dark-100"
+          aria-hidden
+        />
+      )}
+    </div>
+  );
+}
 
 export function WritingList({ posts }: { posts: WritingMeta[] }) {
   return (
     <motion.section
+      id="projects"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "0px 0px -60px 0px" }}
       variants={reveal}
-      className="flex w-full flex-col gap-6"
+      className="flex w-full scroll-mt-8 flex-col gap-6"
     >
       <div className="flex items-baseline justify-between gap-4">
         <p className="text-base text-title">Projects, Writing & Labs</p>
@@ -32,7 +56,7 @@ export function WritingList({ posts }: { posts: WritingMeta[] }) {
         </Link>
       </div>
 
-      <div className="flex w-full flex-col">
+      <div className="group/list flex w-full flex-col">
         {posts.length === 0 ? (
           <p className="text-sm text-description">
             New writeups will land here as labs and assessments get documented.
@@ -43,14 +67,12 @@ export function WritingList({ posts }: { posts: WritingMeta[] }) {
               key={post.slug}
               href={`/writing/${post.slug}`}
               data-cuelume-press
-              className="group relative flex w-full flex-col gap-2 border-b border-dashed border-b-dark-500 py-6 transition-opacity last:border-none hover:opacity-100 group-hover:not-hover:opacity-60 sm:flex-row sm:items-start sm:gap-6"
+              className={cn(
+                "group relative flex w-full flex-col gap-2 border-b border-b-dark-750 py-6 transition-opacity last:border-none sm:flex-row sm:items-start sm:gap-6",
+                "group-hover/list:opacity-60 hover:opacity-100!",
+              )}
             >
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-dark-850 ring-1 ring-dark-700">
-                <GalleryHorizontalEnd
-                  className="size-4 text-dark-100"
-                  aria-hidden
-                />
-              </div>
+              <CoverThumb post={post} />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <p className="text-base text-title group-hover:text-white">
