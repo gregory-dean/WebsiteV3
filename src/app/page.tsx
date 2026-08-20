@@ -46,8 +46,8 @@ export default function HomePage() {
         <Section>
           <p className="text-base text-title">What&apos;s next</p>
           <p className="text-base text-description [&>a]:text-title [&>a]:hover:text-white">
-            If any of the labs or writeups resonate with what you&apos;re
-            building,{" "}
+            If the labs, projects, or writeups are useful, or you want to talk
+            about opportunities,{" "}
             <a
               data-cuelume-press
               href={site.links.linkedin}
@@ -56,9 +56,7 @@ export default function HomePage() {
             >
               <span>let&apos;s connect</span>
             </a>
-            . I&apos;m actively looking for SOC Analyst I or Junior Penetration
-            Tester roles where I can contribute and grow under experienced
-            practitioners. Or email <CopyEmail />.
+            . Or email <CopyEmail />.
           </p>
           <SocialLinks />
           <p className="pt-4 text-xs text-dark-400">

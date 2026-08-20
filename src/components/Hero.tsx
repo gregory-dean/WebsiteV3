@@ -90,8 +90,13 @@ export function Hero() {
               active={step === 2}
               href="https://github.com/gregory-dean/Homelab"
             />{" "}
-            and hands-on apprentice work at Evolve. I&apos;m looking for SOC
-            Analyst or Junior Penetration Tester roles.
+            and hands-on apprentice work at Evolve. Browse my{" "}
+            <EmphasizedLink
+              value="projects and writing"
+              active={step === 1}
+              href="#projects"
+            />
+            .
           </p>
           <ParticleScene delay={DURATION_TOTAL_REVEAL} morphSeconds={6} />
           <SocialLinks />
