@@ -157,7 +157,7 @@ export const experience: ExperienceItem[] = [
     description:
       "I sit between business operations and the technology behind them. I build internal platforms, run security assessments, and harden the systems the company depends on every day.",
     icon: "building",
-    link: null,
+    link: { href: "https://kdroofing.com/", label: "Visit KD Roofing" },
     detail: {
       summary: [
         "KD Roofing is a regional roofing contractor, and I run point on the systems that keep it moving. The role covers everything from security assessments to internal software, so no two weeks look the same.",
