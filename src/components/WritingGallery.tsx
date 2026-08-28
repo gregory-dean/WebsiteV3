@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -8,6 +9,15 @@ import { reveal } from "@/data/site";
 import { StatusBadge } from "@/components/StatusBadge";
 import { cn } from "@/lib/cn";
 import { formatDate, type WritingMeta } from "@/lib/types";
+
+type KindFilter = "all" | WritingMeta["kind"];
+
+const KIND_FILTERS: { id: KindFilter; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "project", label: "Projects" },
+  { id: "writeup", label: "Writeups" },
+  { id: "note", label: "Notes" },
+];
 
 const kindLabel: Record<WritingMeta["kind"], string> = {
   writeup: "Writeup",
@@ -132,8 +142,44 @@ function GridCard({ post }: { post: WritingMeta }) {
   );
 }
 
+function KindFilterRow({
+  value,
+  onChange,
+}: {
+  value: KindFilter;
+  onChange: (next: KindFilter) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {KIND_FILTERS.map((option) => {
+        const selected = value === option.id;
+        return (
+          <button
+            key={option.id}
+            type="button"
+            aria-pressed={selected}
+            data-cuelume-press
+            onClick={() => onChange(option.id)}
+            className={cn(
+              "cursor-pointer rounded-sm bg-dark-850 px-1.5 py-0.5 text-xs uppercase tracking-widest ring-1",
+              selected
+                ? "text-title ring-dark-500"
+                : "text-dark-400 ring-dark-700 hover:text-title",
+            )}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function WritingGallery({ posts }: { posts: WritingMeta[] }) {
-  const [featured, ...rest] = posts;
+  const [kind, setKind] = useState<KindFilter>("all");
+  const visible =
+    kind === "all" ? posts : posts.filter((post) => post.kind === kind);
+  const [featured, ...rest] = visible;
 
   return (
     <motion.section
@@ -142,17 +188,22 @@ export function WritingGallery({ posts }: { posts: WritingMeta[] }) {
       variants={reveal}
       className="flex w-full flex-col gap-8"
     >
-      <div className="flex flex-col gap-2">
-        <p className="text-base text-title">Projects, Writing & Labs</p>
-        <p className="text-sm text-description">
-          Homelab work, tools, and writeups
-        </p>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
+          <p className="text-base text-title">Projects, Writing & Labs</p>
+          <p className="text-sm text-description">
+            Homelab work, tools, and writeups
+          </p>
+        </div>
+        <KindFilterRow value={kind} onChange={setKind} />
       </div>
 
       {posts.length === 0 ? (
         <p className="text-sm text-description">
           New writeups will land here as labs and assessments get documented.
         </p>
+      ) : visible.length === 0 ? (
+        <p className="text-sm text-description">Nothing in this view yet.</p>
       ) : (
         <>
           {featured ? <FeaturedCard post={featured} /> : null}

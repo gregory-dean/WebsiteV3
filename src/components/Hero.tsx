@@ -94,7 +94,7 @@ export function Hero() {
             <EmphasizedLink
               value="projects and writing"
               active={step === 1}
-              href="#projects"
+              href="/writing"
             />
             .
           </p>
