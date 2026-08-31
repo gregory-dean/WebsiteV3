@@ -54,6 +54,8 @@ export const skillsRows = [
     "Windows Server",
     "Active Directory",
     "Group Policy",
+    "OPNsense",
+    "Proxmox",
     "DNS",
   ],
   [
@@ -65,6 +67,7 @@ export const skillsRows = [
     "OpenVAS",
     "Sysmon",
     "Zeek",
+    "VXLAN",
     "Wazuh",
   ],
   [

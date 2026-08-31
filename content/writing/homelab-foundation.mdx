@@ -1,47 +1,75 @@
 ---
 title: Building a Cybersecurity Homelab
-summary: An enterprise-style lab on VirtualBox with Active Directory, Wazuh, and a documented path from networking fundamentals to detection engineering.
-date: "2026-03-01"
+summary: A 10-inch desk rack with OPNsense at the edge, two Proxmox nodes, and a VXLAN overlay that isolates an Active Directory range the house switch cannot.
+date: "2026-08-31"
 kind: writeup
 status: lab
 tags:
   - Homelab
-  - Active Directory
-  - SIEM
-cover: /writing/homelab.png
-coverAlt: Homelab lab status terminal
+  - OPNsense
+  - Proxmox
+cover: /writing/homelab-rack.jpg
+coverAlt: Front of the 10-inch desk rack with the switch, patch panel, and three Tiny PCs
 ---
 
-## Why a homelab
+## Why I rebuilt it
 
-I wanted a controlled place to practice both sides of the fight: administer systems like a defender, then attack them like an adversary, without putting anyone else's network at risk. The [Homelab repo](https://github.com/gregory-dean/Homelab) tracks the build in public so the process itself becomes a portfolio artifact.
+I wanted a controlled place to practice both sides of the fight: administer systems like a defender, then attack them like an adversary, without putting anyone else's network at risk. The first version lived in VirtualBox on a single Windows desktop. That was enough to learn the guests. It was not enough to learn the network.
 
-## Architecture
+The [Homelab repo](https://github.com/gregory-dean/Homelab) is the public build log. This page is the map.
 
-The lab simulates a small enterprise environment on a Windows 11 host with Oracle VirtualBox:
+## What sits on the desk
 
-- Internal subnet `192.168.56.0/24` on a host-only adapter, with NAT per VM for controlled outbound access
-- **DC-01**, a Windows Server 2022 domain controller providing Active Directory and internal DNS
-- **WINCLIENT-01**, a domain-joined workstation for authentication and Group Policy validation
-- **KALI-01**, an off-domain attack machine for offensive testing
-- **UBUNTU-01**, a Linux server for services and log generation
-- **SIEM-01**, a Wazuh platform for log aggregation, detection, and alerting
+The lab is an 8U, 10-inch DeskPi RackMate. From the top of the cabinet: an unmanaged TP-Link LS108GP, a 12-port keystone panel, then three Lenovo Tiny PCs in printed trays.
 
-## The build, phase by phase
+- **Sirius**, an M720q with an i5-8400T, runs OPNsense on the metal. A four-port Intel I350 handles WAN to the ISP modem and LAN to the switch.
+- **Polaris**, an M720q with an i5-9500T and 32 GB, is the primary Proxmox node. Guests live on a single-disk ZFS pool for snapshots and checksums, not redundancy.
+- **Vega**, an M715q with a Ryzen 3 PRO 2200GE and 32 GB, is the second Proxmox node. Storage is ext4 with LVM-thin.
+- **Sol**, the Ryzen 7 5800X Windows desktop, is the command center. I do not run the hypervisors on it.
+- **Lyra**, an Archer AX6000, is house Wi-Fi in access-point mode. Sirius stays the only DHCP server on Core.
 
-1. **Lab foundation and networking**, complete
-2. **AD identity and access**, complete
-3. **Log collection and SIEM onboarding**, in progress
-4. **Vulnerability management workflow**, planned
-5. **Attack simulation and detection**, planned
-6. **Linux hardening and monitoring**, planned
+Star names stay on the metal. Role names stay on the guests.
 
-The SIEM phase is where the lab starts paying off. I'm deploying Wazuh agents alongside Sysmon to get real endpoint visibility into process creation, PowerShell activity, and lateral movement indicators, then tuning detection rules and alert thresholds so coverage stays high while false positives drop.
+## Two firewalls, on purpose
 
-## Tooling in play
+The switch cannot do VLANs. Everything patched into it shares one Layer 2 network I call Core, `10.10.10.0/24`. Sirius never sees traffic between two devices on the same switch, so lab isolation cannot live on the edge box alone.
 
-Wazuh, Sysmon, Nmap, Wireshark, Nessus and OpenVAS, Metasploit, and Burp Suite sit alongside Active Directory, DNS, and Group Policy. The goal isn't collecting logos. It's generating realistic telemetry and practicing the full loop from exploit to detection to remediation.
+**Sirius** owns WAN, house internet, Core DHCP, Core DNS, and NAT for both Core and the lab prefixes.
 
-## What's next
+**gw-01** is a second OPNsense install, a VM on Polaris. It is not hardware. It routes the lab networks and nothing else. It does not NAT. Its Core address is `10.10.10.3`. The deny from the attack network to Core is a rule on gw-01.
 
-Once the logs are trustworthy, attack simulation becomes useful instead of noisy. Each phase gets its own writeup in the repo, including asset inventories, architecture docs, and the troubleshooting notes from everything that broke along the way. Those notes might be the most valuable part.
+House phones on Lyra can reach the internet. They cannot enter the lab. Sol can, on purpose.
+
+## Isolation without VLANs
+
+The lab is a VXLAN overlay between Polaris (`10.10.10.11`) and Vega (`10.10.10.12`). Guests on those vnets have no physical NIC. The two nodes encapsulate the frames, which is how `kali-01` on Vega reaches `dc-01` on Polaris.
+
+- **labsrv** `10.30.10.0/24` — servers
+- **labep** `10.30.20.0/24` — endpoints
+- **labatk** `10.30.30.0/24` — the attack box
+
+Sirius holds static routes for those three prefixes via gw-01. Hybrid source NAT on Sirius translates both `10.10.10.0/24` and `10.30.0.0/16` out WAN.
+
+![Network diagram of Core, the VXLAN overlay, and the lab prefixes](/writing/homelab-network.jpg)
+
+DNS is two zones on purpose. `home.gregory-dean.com` is Core, owned by Unbound on Sirius. `lab.gregory-dean.com` is Active Directory on `dc-01`. Sirius forwards the lab zone so Sol can resolve lab names without joining the domain.
+
+## The range
+
+Polaris holds the identity and visibility stack. Vega holds the off-domain boxes.
+
+- **dc-01** — Windows Server 2022, AD DS for `lab.gregory-dean.com`
+- **winclient-01** — Windows 11 Pro, domain joined
+- **siem-01** — Ubuntu Server with Wazuh installed and reachable
+- **ubuntu-01** — Ubuntu Server, off domain
+- **kali-01** — Kali, off domain, on the attack vnet
+
+`labatk` may reach `labsrv` and `labep`. That is the point. Servers and endpoints do not initiate toward Kali. Nothing on the range initiates toward Core.
+
+The cluster is two nodes, one UI, no shared storage, no HA. Corosync and VXLAN ride Core. Admin SSH and the Proxmox UI accept Sol and the peer hypervisors. A phone on Wi-Fi does not.
+
+## What is next
+
+Wazuh is on the box. Agents, Sysmon, and detection tuning are the next pass, then attack simulation that produces telemetry I can actually hunt. Each piece of the build already has a guide in the repo: rack, firewall, hypervisor, switching, access point, command center, and guests, plus the architecture and inventory pages.
+
+The troubleshooting notes might be the most useful part. I kept them because that is the work.
