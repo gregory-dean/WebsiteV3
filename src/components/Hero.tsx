@@ -84,13 +84,13 @@ export function Hero() {
       <motion.div variants={revealBig} className="w-full">
         <div className="flex w-full flex-col gap-6">
           <p className="text-base text-description [&>span]:text-title">
-            Recent adventures include a full{" "}
+            Recent adventures include a{" "}
             <EmphasizedLink
-              value="cybersecurity homelab"
+              value="10-inch desk rack homelab"
               active={step === 2}
-              href="https://github.com/gregory-dean/Homelab"
+              href="/writing/homelab-foundation"
             />{" "}
-            and hands-on apprentice work at Evolve. Browse my{" "}
+            with OPNsense at the edge and two Proxmox nodes. Browse my{" "}
             <EmphasizedLink
               value="projects and writing"
               active={step === 1}
