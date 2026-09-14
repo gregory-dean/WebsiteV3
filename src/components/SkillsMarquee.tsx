@@ -98,6 +98,8 @@ function Row({
 }
 
 export function SkillsMarquee() {
+  const rows = skillsRows;
+
   return (
     <div className="relative isolate mt-3 h-auto w-full overflow-hidden rounded-sm border border-dark-700 bg-dark-950/40 py-3 sm:h-60 sm:py-4">
       <div
@@ -110,10 +112,10 @@ export function SkillsMarquee() {
       />
 
       <div className="flex h-full flex-col justify-center gap-2">
-        <Row items={skillsRows[0]} />
-        <Row items={skillsRows[1]} reverse />
-        <Row items={skillsRows[2]} />
-        <Row items={skillsRows[3]} reverse />
+        <Row items={rows[0]} />
+        <Row items={rows[1]} reverse />
+        <Row items={rows[2]} />
+        <Row items={rows[3]} reverse />
       </div>
     </div>
   );

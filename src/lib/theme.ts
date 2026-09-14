@@ -29,24 +29,6 @@ export function readStoredTheme(): ThemeId {
 
 /** Particle tint per theme — keeps morph field on-palette. */
 export const themeParticleTint: Record<ThemeId, string> = {
-  base: "#b6baca",
-  terminal: "#7fb897",
-  amber: "#e2c89a",
-  ocean: "#b7d7e8",
-  paper: "#3f3a30",
-  graphite: "#d0d0d0",
-  nord: "#e5e9f0",
-  copper: "#e6c4a4",
-  crimson: "#e6b8c0",
-  moss: "#d2dcb8",
-  arctic: "#cfe0eb",
   mono: "#f0f0f0",
-  sand: "#e4d6be",
-  ink: "#cfd9f0",
   signal: "#7ad07a",
-  dusk: "#dccff0",
-  honey: "#f0d89a",
-  fog: "#2a303a",
-  carbon: "#d2dae2",
-  wine: "#e8c0d0",
 };

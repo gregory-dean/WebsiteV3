@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, GalleryHorizontalEnd } from "lucide-react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import Link from "next/link";
 import { reveal } from "@/data/site";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -10,7 +10,7 @@ import { formatDate, type WritingMeta } from "@/lib/types";
 
 export function WritingList({ posts }: { posts: WritingMeta[] }) {
   return (
-    <motion.section
+    <m.section
       id="projects"
       initial="hidden"
       whileInView="visible"
@@ -58,7 +58,7 @@ export function WritingList({ posts }: { posts: WritingMeta[] }) {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <p className="text-base text-title group-hover:text-white">
+                  <p className="text-base text-title group-hover:text-title">
                     {post.title}
                   </p>
                   <span className="text-xs uppercase tracking-widest text-dark-400">
@@ -83,6 +83,6 @@ export function WritingList({ posts }: { posts: WritingMeta[] }) {
           ))
         )}
       </div>
-    </motion.section>
+    </m.section>
   );
 }

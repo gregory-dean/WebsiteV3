@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { reveal } from "@/data/site";
@@ -27,7 +27,7 @@ const kindLabel: Record<WritingMeta["kind"], string> = {
 
 function KindPill({ kind }: { kind: WritingMeta["kind"] }) {
   return (
-    <span className="rounded-sm bg-dark-950/80 px-1.5 py-0.5 text-xs uppercase tracking-widest text-title ring-1 ring-dark-700 backdrop-blur-sm">
+    <span className="rounded-sm bg-dark-950/80 px-1.5 py-0.5 text-xs uppercase tracking-widest text-title ring-1 ring-dark-700">
       {kindLabel[kind]}
     </span>
   );
@@ -85,7 +85,7 @@ function FeaturedCard({ post }: { post: WritingMeta }) {
     <Link
       href={`/writing/${post.slug}`}
       data-cuelume-press
-      className="group grid overflow-hidden rounded-lg bg-dark-850/40 ring-1 ring-dark-700 transition-all duration-300 hover:bg-dark-850/70 hover:ring-dark-500 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"
+      className="group grid overflow-hidden rounded-lg bg-dark-850/40 ring-1 ring-dark-700 transition-colors duration-300 hover:bg-dark-850/70 hover:ring-dark-500 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"
     >
       <Cover
         post={post}
@@ -97,9 +97,7 @@ function FeaturedCard({ post }: { post: WritingMeta }) {
           <StatusBadge status={post.status} />
           <span className="text-xs text-dark-400">{formatDate(post.date)}</span>
         </div>
-        <h2 className="text-xl text-title group-hover:text-white sm:text-2xl">
-          {post.title}
-        </h2>
+        <h2 className="text-xl text-title sm:text-2xl">{post.title}</h2>
         <p className="text-sm text-description">{post.summary}</p>
         <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
           <Tags tags={post.tags} />
@@ -118,14 +116,12 @@ function GridCard({ post }: { post: WritingMeta }) {
     <Link
       href={`/writing/${post.slug}`}
       data-cuelume-press
-      className="group flex flex-col overflow-hidden rounded-lg bg-dark-850/40 ring-1 ring-dark-700 transition-all duration-300 hover:bg-dark-850/70 hover:ring-dark-500"
+      className="group flex flex-col overflow-hidden rounded-lg bg-dark-850/40 ring-1 ring-dark-700 transition-colors duration-300 hover:bg-dark-850/70 hover:ring-dark-500"
     >
       <Cover post={post} className="aspect-[16/9]" />
       <div className="flex flex-1 flex-col gap-2 p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-base text-title group-hover:text-white">
-            {post.title}
-          </p>
+          <p className="text-base text-title">{post.title}</p>
           <StatusBadge status={post.status} />
         </div>
         <p className="text-sm text-description">{post.summary}</p>
@@ -182,7 +178,7 @@ export function WritingGallery({ posts }: { posts: WritingMeta[] }) {
   const [featured, ...rest] = visible;
 
   return (
-    <motion.section
+    <m.section
       initial="hidden"
       animate="visible"
       variants={reveal}
@@ -216,6 +212,6 @@ export function WritingGallery({ posts }: { posts: WritingMeta[] }) {
           ) : null}
         </>
       )}
-    </motion.section>
+    </m.section>
   );
 }

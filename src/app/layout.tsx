@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { CuelumeBind } from "@/components/CuelumeBind";
+import { MotionProvider } from "@/components/MotionProvider";
+import { CtfPanel } from "@/components/ctf/CtfPanel";
+import { SignalProvider } from "@/components/signal/SignalProvider";
 import { site } from "@/data/site";
 import "./globals.css";
 
@@ -12,6 +15,7 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -29,9 +33,9 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/og-social-preview.png",
-        width: 1280,
-        height: 640,
+        url: "/og-social-preview.jpg",
+        width: 1200,
+        height: 630,
         alt: site.title,
       },
     ],
@@ -40,11 +44,11 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: site.title,
     description: site.description,
-    images: ["/og-social-preview.png"],
+    images: ["/og-social-preview.jpg"],
   },
 };
 
-const themeInitScript = `(()=>{try{var k="gd-theme";var t=localStorage.getItem(k);document.documentElement.dataset.theme=t||"mono";}catch(e){document.documentElement.dataset.theme="mono";}})();`;
+const themeInitScript = `(()=>{try{var k="gd-theme";var a=["mono","signal"];var t=localStorage.getItem(k);document.documentElement.dataset.theme=(t&&a.indexOf(t)>=0)?t:"mono";}catch(e){document.documentElement.dataset.theme="mono";}})();`;
 
 export default function RootLayout({
   children,
@@ -62,8 +66,22 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="flex min-h-full flex-col bg-background text-description">
-        <CuelumeBind />
-        {children}
+        <div
+          hidden
+          dangerouslySetInnerHTML={{
+            __html:
+              "<!-- flag{read_the_source} · four more. press the radio icon. -->",
+          }}
+        />
+        <MotionProvider>
+          <SignalProvider>
+            <CuelumeBind />
+            <CtfPanel />
+            <div id="app-root" className="flex min-h-full flex-col">
+              {children}
+            </div>
+          </SignalProvider>
+        </MotionProvider>
       </body>
     </html>
   );

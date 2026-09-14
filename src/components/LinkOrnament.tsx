@@ -1,8 +1,9 @@
 "use client";
 
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
+import { usePrefersReducedMotion } from "@/lib/reduced-motion";
 
 function curvePoint(t: number, scale: number) {
   const n = t * Math.PI * 2;
@@ -13,8 +14,14 @@ function curvePoint(t: number, scale: number) {
   };
 }
 
-function FlowerMark({ className }: { className?: string }) {
-  const start = useRef(performance.now());
+function FlowerMark({
+  className,
+  active,
+}: {
+  className?: string;
+  active: boolean;
+}) {
+  const start = useRef(0);
   const [state, setState] = useState({
     path: "",
     rotation: 0,
@@ -22,12 +29,16 @@ function FlowerMark({ className }: { className?: string }) {
   });
 
   useEffect(() => {
+    if (!active) return;
+    start.current = performance.now();
     let frame = 0;
     const tick = (now: number) => {
       const elapsed = now - start.current;
       const phase = (elapsed % 5200) / 5200;
       const scale =
-        0.52 + ((Math.sin(((elapsed % 4300) / 4300) * Math.PI * 2 + 0.55) + 1) / 2) * 0.48;
+        0.52 +
+        ((Math.sin(((elapsed % 4300) / 4300) * Math.PI * 2 + 0.55) + 1) / 2) *
+          0.48;
 
       const particles = Array.from({ length: 74 }, (_, i) => {
         const n = i / 73;
@@ -55,7 +66,9 @@ function FlowerMark({ className }: { className?: string }) {
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [active]);
+
+  if (!active && !state.path) return null;
 
   return (
     <svg viewBox="0 0 100 100" fill="none" className={cn("size-6 text-current", className)}>
@@ -88,24 +101,18 @@ const ornamentVariants = {
     translateX: 12,
     translateY: -14,
     opacity: 0,
-    filter: "blur(10px)",
     transition: {
       ease: "easeOut" as const,
-      duration: 1.75,
-      opacity: { duration: 0.35, delay: 1.4 },
-      translateX: { duration: 0.35, delay: 1.4 },
-      translateY: { duration: 0.35, delay: 1.4 },
+      duration: 0.35,
     },
   },
   shown: {
     translateX: 14,
     translateY: -16,
     opacity: 1,
-    filter: "blur(0px)",
     transition: {
       ease: "easeOut" as const,
-      duration: 1,
-      filter: { duration: 0.2 },
+      duration: 0.4,
     },
   },
 };
@@ -119,28 +126,28 @@ export function EmphasizedLink({
   href: string;
   active: boolean;
 }) {
+  const reduceMotion = usePrefersReducedMotion();
+  const showMark = active && !reduceMotion;
   const external = /^https?:\/\//.test(href);
   return (
     <span className="relative">
-      <motion.a
+      <m.a
         data-cuelume-press
         href={href}
-        {...(external
-          ? { target: "_blank", rel: "noopener noreferrer" }
-          : {})}
-        className="cursor-pointer text-title hover:text-white"
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        className="cursor-pointer text-title hover:text-title"
       >
         {value}
-      </motion.a>
-      <motion.span
+      </m.a>
+      <m.span
         aria-hidden
         className="pointer-events-none absolute top-0 right-0 z-3 flex select-none items-center justify-center"
         initial="hidden"
-        animate={active ? "shown" : "hidden"}
+        animate={showMark ? "shown" : "hidden"}
         variants={ornamentVariants}
       >
-        <FlowerMark className="size-6 text-dark-100" />
-      </motion.span>
+        <FlowerMark className="size-6 text-dark-100" active={showMark} />
+      </m.span>
     </span>
   );
 }

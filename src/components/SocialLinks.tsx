@@ -3,9 +3,8 @@
 import { Check, Mail, Radio } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { site } from "@/data/site";
+import { useSignal } from "@/components/signal/SignalProvider";
 import { copyTextToClipboard } from "@/lib/clipboard";
-import { applyTheme, DEFAULT_THEME, readStoredTheme } from "@/lib/theme";
-import type { ThemeId } from "@/data/themes";
 
 function GitHubIcon({ className }: { className?: string }) {
   return (
@@ -52,7 +51,7 @@ const items = [
 ] as const;
 
 export function SocialLinks() {
-  const [theme, setTheme] = useState<ThemeId>(DEFAULT_THEME);
+  const { on, toggle } = useSignal();
   const [copied, setCopied] = useState(false);
   const copiedTimer = useRef<number | undefined>(undefined);
 
@@ -67,27 +66,13 @@ export function SocialLinks() {
     copiedTimer.current = window.setTimeout(() => setCopied(false), 1800);
   };
 
-  useEffect(() => {
-    const current = readStoredTheme();
-    setTheme(current);
-    applyTheme(current);
-
-    const onTheme = (event: Event) => {
-      const detail = (event as CustomEvent<ThemeId>).detail;
-      if (detail) setTheme(detail);
-    };
-    window.addEventListener("gd-theme", onTheme);
-    return () => window.removeEventListener("gd-theme", onTheme);
-  }, []);
-
-  const signalOn = theme === "signal";
-
   return (
     <div className="-ml-1.5 flex flex-row flex-wrap items-center gap-2 transition-colors duration-200 *:cursor-pointer *:text-dark-400 *:hover:text-title">
       {items.map(({ title, href, icon: Icon }) => (
         <a
           key={href}
           title={title}
+          aria-label={title}
           className="rounded-sm"
           href={href}
           target="_blank"
@@ -122,7 +107,7 @@ export function SocialLinks() {
         </button>
         <span
           aria-live="polite"
-          className={`pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 rounded-sm bg-dark-800 px-2 py-0.5 text-xs whitespace-nowrap text-title ring-1 ring-dark-700 transition-all duration-200 ${
+          className={`pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 rounded-sm bg-dark-800 px-2 py-0.5 text-xs whitespace-nowrap text-title ring-1 ring-dark-700 transition-opacity duration-200 ${
             copied ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
           }`}
         >
@@ -131,20 +116,16 @@ export function SocialLinks() {
       </div>
       <button
         type="button"
-        title={signalOn ? "Return to mono" : "Signal"}
-        aria-label={signalOn ? "Switch theme back to mono" : "Switch theme to signal"}
-        aria-pressed={signalOn}
+        title={on ? "Turn signal off" : "Signal"}
+        aria-label={on ? "Turn signal off" : "Turn signal on"}
+        aria-pressed={on}
         data-cuelume-press
-        onClick={() => {
-          const next: ThemeId = signalOn ? DEFAULT_THEME : "signal";
-          setTheme(next);
-          applyTheme(next);
-        }}
+        onClick={toggle}
         className="rounded-sm text-dark-400 hover:text-title"
       >
         <div className="flex size-8 cursor-pointer items-center justify-center rounded-sm transition-colors hover:bg-dark-800">
           <Radio
-            className={`size-4 transition-colors ${signalOn ? "text-accent" : ""}`}
+            className={`size-4 transition-colors ${on ? "text-accent" : ""}`}
           />
         </div>
       </button>

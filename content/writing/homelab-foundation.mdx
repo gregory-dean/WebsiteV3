@@ -1,47 +1,175 @@
 ---
-title: Building a Cybersecurity Homelab
-summary: An enterprise-style lab on VirtualBox with Active Directory, Wazuh, and a documented path from networking fundamentals to detection engineering.
-date: "2026-03-01"
+title: Homelab
+summary: I built a 10 inch desk rack with OPNsense on the edge, two Proxmox nodes, and a VXLAN lab that stays off the house network.
+date: "2026-08-31"
 kind: writeup
 status: lab
 tags:
   - Homelab
-  - Active Directory
-  - SIEM
-cover: /writing/homelab.png
-coverAlt: Homelab lab status terminal
+  - OPNsense
+  - Proxmox
+cover: /writing/homelab.webp
+coverAlt: Front of the 10 inch desk rack
 ---
 
-## Why a homelab
+## Why I built it
 
-I wanted a controlled place to practice both sides of the fight: administer systems like a defender, then attack them like an adversary, without putting anyone else's network at risk. The [Homelab repo](https://github.com/gregory-dean/Homelab) tracks the build in public so the process itself becomes a portfolio artifact.
+I wanted a place to practice both sides of the work. Administer a small network like a defender, then attack it, without putting the rest of the house on that path. The public notes are in the [Homelab repo](https://github.com/gregory-dean/Homelab).
 
-## Architecture
+## The constraint
 
-The lab simulates a small enterprise environment on a Windows 11 host with Oracle VirtualBox:
+The switch in the cabinet is a TP-Link LS108GP. It's unmanaged, so it can't do VLANs. Everything plugged into it shares one Layer 2 network. I call that network Core. Sirius sits at the edge and never sees traffic between two devices on that switch. If isolation lived only there, a guest on the attack network could reach a phone or laptop on Core without crossing a firewall.
 
-- Internal subnet `192.168.56.0/24` on a host-only adapter, with NAT per VM for controlled outbound access
-- **DC-01**, a Windows Server 2022 domain controller providing Active Directory and internal DNS
-- **WINCLIENT-01**, a domain-joined workstation for authentication and Group Policy validation
-- **KALI-01**, an off-domain attack machine for offensive testing
-- **UBUNTU-01**, a Linux server for services and log generation
-- **SIEM-01**, a Wazuh platform for log aggregation, detection, and alerting
+So I run two OPNsense installs, and they're easy to mix up. Sirius is the physical edge. gw-01 is a VM on Polaris that routes the lab and nothing else. The deny from the attack network to Core is a rule on gw-01, where every lab packet has to pass.
 
-## The build, phase by phase
+Sirius has a 10Gtek Intel I350 for WAN and LAN. I confirmed which `igb` device was which at the console by plugging in one cable at a time, and I labeled the bracket to match.
 
-1. **Lab foundation and networking**, complete
-2. **AD identity and access**, complete
-3. **Log collection and SIEM onboarding**, in progress
-4. **Vulnerability management workflow**, planned
-5. **Attack simulation and detection**, planned
-6. **Linux hardening and monitoring**, planned
+## What is in the rack
 
-The SIEM phase is where the lab starts paying off. I'm deploying Wazuh agents alongside Sysmon to get real endpoint visibility into process creation, PowerShell activity, and lateral movement indicators, then tuning detection rules and alert thresholds so coverage stays high while false positives drop.
+The cabinet is a DeskPi RackMate T1, 8U and 10 inches wide. I keep star names on the metal and role names on the guests so it's obvious at a glance which kind of thing I'm looking at.
 
-## Tooling in play
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Device</th>
+      <th>Role</th>
+      <th>Address</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Sirius</td>
+      <td>M720q i5-8400T</td>
+      <td>OPNsense, physical edge</td>
+      <td><code>10.10.10.1</code></td>
+    </tr>
+    <tr>
+      <td>Polaris</td>
+      <td>M720q i5-9500T</td>
+      <td>Proxmox, primary</td>
+      <td><code>10.10.10.11</code></td>
+    </tr>
+    <tr>
+      <td>Vega</td>
+      <td>M715q Ryzen 3 PRO 2200GE</td>
+      <td>Proxmox, secondary</td>
+      <td><code>10.10.10.12</code></td>
+    </tr>
+    <tr>
+      <td>Sol</td>
+      <td>Ryzen 7 5800X desktop</td>
+      <td>Command center</td>
+      <td><code>10.10.10.154</code></td>
+    </tr>
+    <tr>
+      <td>Lyra</td>
+      <td>Archer AX6000</td>
+      <td>Access point</td>
+      <td><code>10.10.10.2</code></td>
+    </tr>
+    <tr>
+      <td>gw-01</td>
+      <td>VM on Polaris</td>
+      <td>OPNsense, lab router</td>
+      <td><code>10.10.10.3</code></td>
+    </tr>
+    <tr>
+      <td>dc-01</td>
+      <td>VM on Polaris</td>
+      <td>AD DS</td>
+      <td><code>10.30.10.10</code></td>
+    </tr>
+    <tr>
+      <td>winclient-01</td>
+      <td>VM on Polaris</td>
+      <td>Windows 11 Pro, domain joined</td>
+      <td><code>10.30.20.20</code></td>
+    </tr>
+    <tr>
+      <td>siem-01</td>
+      <td>VM on Polaris</td>
+      <td>Wazuh</td>
+      <td><code>10.30.10.50</code></td>
+    </tr>
+    <tr>
+      <td>ubuntu-01</td>
+      <td>VM on Vega</td>
+      <td>Ubuntu Server, off domain</td>
+      <td><code>10.30.10.40</code></td>
+    </tr>
+    <tr>
+      <td>kali-01</td>
+      <td>VM on Vega</td>
+      <td>Kali, off domain</td>
+      <td><code>10.30.30.30</code></td>
+    </tr>
+  </tbody>
+</table>
 
-Wazuh, Sysmon, Nmap, Wireshark, Nessus and OpenVAS, Metasploit, and Burp Suite sit alongside Active Directory, DNS, and Group Policy. The goal isn't collecting logos. It's generating realistic telemetry and practicing the full loop from exploit to detection to remediation.
+The purchased parts came to $1000.70. Despite the name, the 10Gtek card is a gigabit adapter.
 
-## What's next
+Polaris uses ZFS on a single NVMe, so I get snapshots and checksums, but it's still one disk. Vega uses ext4 with LVM thin on a SATA SSD.
 
-Once the logs are trustworthy, attack simulation becomes useful instead of noisy. Each phase gets its own writeup in the repo, including asset inventories, architecture docs, and the troubleshooting notes from everything that broke along the way. Those notes might be the most valuable part.
+## The lab networks
+
+The switch can't do VLANs, so the lab runs as a VXLAN overlay between Polaris and Vega on UDP 4789, MTU 1450. I don't create extra Linux bridges for it, because a bridge with no physical NIC only exists on one node.
+
+<table>
+  <thead>
+    <tr>
+      <th>VNet</th>
+      <th>Prefix</th>
+      <th>Gateway</th>
+      <th>Use</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>labsrv</td>
+      <td><code>10.30.10.0/24</code></td>
+      <td><code>10.30.10.1</code></td>
+      <td>Servers</td>
+    </tr>
+    <tr>
+      <td>labep</td>
+      <td><code>10.30.20.0/24</code></td>
+      <td><code>10.30.20.1</code></td>
+      <td>Endpoints</td>
+    </tr>
+    <tr>
+      <td>labatk</td>
+      <td><code>10.30.30.0/24</code></td>
+      <td><code>10.30.30.1</code></td>
+      <td>Attack box</td>
+    </tr>
+  </tbody>
+</table>
+
+Guests on those vnets have no physical NIC. Polaris and Vega encapsulate the frames and carry them over Core, which is how `kali-01` on Vega reaches `dc-01` on Polaris. `labatk` may hit `labsrv` and `labep`. Attacking those is the whole point of the range.
+
+Sirius holds static routes for the three lab prefixes via `10.10.10.3`, and hybrid source NAT on Sirius translates both `10.10.10.0/24` and `10.30.0.0/16` out the WAN. gw-01 doesn't NAT.
+
+![Logical topology of Core and the VXLAN lab](/writing/topology-dark.webp)
+
+House WiFi clients on Lyra stay on Core and never enter the lab. Sol is the only machine I administer from. SSH and the Proxmox UI only accept Sol and the peer hypervisor.
+
+## DNS
+
+I run two DNS zones on purpose, and they do different jobs.
+
+`home.gregory-dean.com` is Core. Unbound on Sirius owns it, with DNSSEC and DNS over TLS upstream to 1.1.1.1 and 9.9.9.9. Dnsmasq handles DHCP and registers lease names.
+
+`lab.gregory-dean.com` is Active Directory on `dc-01`. Sirius forwards that zone to `10.30.10.10`, so Sol can resolve lab names without joining the domain.
+
+## What I use it for
+
+I use this for cybersecurity projects first, and for personal stuff like self-hosting or game servers when the lab is quiet.
+
+Wazuh is on `siem-01`, and Sysmon goes on the Windows guests. I generate telemetry, then practice the loop from exploit to detection.
+
+## Docs and guides
+
+The [docs](https://github.com/gregory-dean/Homelab/tree/main/docs) describe the lab as it exists right now: what I bought, how it's addressed, and why the network is shaped the way it is.
+
+The [guides](https://github.com/gregory-dean/Homelab/tree/main/guides) are how I'd build this again, written so you can follow along on your own hardware. The names and part numbers in the docs are what I actually run. The guides use placeholders so they aren't tied to my desk.

@@ -5,7 +5,7 @@ import { getAllWriting } from "@/lib/content";
 export const metadata = {
   title: "Projects, Writing & Labs · Gregory Dean",
   description:
-    "Projects, labs, and writeups by Gregory Dean.",
+    "Homelab work, tools, and writeups by Gregory Dean.",
 };
 
 export default function WritingIndexPage() {

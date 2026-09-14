@@ -33,11 +33,11 @@ export default function HomePage() {
       <div className="mx-auto flex w-full max-w-2xl flex-col items-start px-3 align-top sm:px-6 md:px-0">
         <Section>
           <p className="text-base text-title">Education & training</p>
-          <p className="text-base text-description [&>a]:text-title [&>a]:hover:text-white">
+          <p className="text-base text-description [&>a]:text-title [&>a]:hover:text-title">
             Cybersecurity Apprentice at Evolve Security Academy (2025), ESCP
-            certified. Hands-on labs across penetration testing, threat
-            hunting, malware analysis, and live incident response. CompTIA
-            Security+ expected in 2026. Based in {site.location}.
+            certified. Labs covered penetration testing, threat hunting, malware
+            analysis, and incident response. CompTIA Security+ expected in 2026.
+            Based in {site.location}.
           </p>
         </Section>
       </div>
@@ -45,9 +45,8 @@ export default function HomePage() {
       <div className="mx-auto flex w-full max-w-2xl flex-col items-start px-3 align-top sm:px-6 md:px-0">
         <Section>
           <p className="text-base text-title">What&apos;s next</p>
-          <p className="text-base text-description [&>a]:text-title [&>a]:hover:text-white">
-            If the labs, projects, or writeups are useful, or you want to talk
-            about opportunities,{" "}
+          <p className="text-base text-description [&>a]:text-title [&>a]:hover:text-title">
+            If a writeup or the lab is useful, or you want to talk about a role,{" "}
             <a
               data-cuelume-press
               href={site.links.linkedin}

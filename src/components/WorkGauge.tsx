@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  animate,
-  motion,
-  useMotionValue,
-  useTransform,
-} from "motion/react";
+import { animate, m, useMotionValue, useTransform } from "motion/react";
 import { useEffect } from "react";
 import type { WorkStat } from "@/data/site";
 import { cn } from "@/lib/cn";
@@ -66,9 +61,7 @@ export function WorkGauge({
         </div>
 
         <div className="flex shrink-0 items-baseline gap-1 tabular-nums">
-          <motion.span className="text-4xl leading-none text-title">
-            {display}
-          </motion.span>
+          <m.span className="text-4xl leading-none text-title">{display}</m.span>
           {stat.unit ? (
             <span className="text-base text-dark-400">{stat.unit}</span>
           ) : null}
@@ -76,7 +69,7 @@ export function WorkGauge({
       </div>
 
       <div className="relative h-px w-full overflow-hidden bg-dark-750">
-        <motion.div
+        <m.div
           className={cn(
             "absolute inset-y-0 left-0",
             accent ? "bg-accent" : "bg-dark-300",

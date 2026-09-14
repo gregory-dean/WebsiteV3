@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  AppWindow,
-  ArrowUpRight,
-  Building2,
-  Shield,
-  Wifi,
-} from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AppWindow, ArrowUpRight, Building2, Shield, Wifi } from "lucide-react";
+import { m } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
 import { experience, reveal, type ExperienceItem } from "@/data/site";
@@ -45,16 +39,9 @@ function Row({
           "group-hover/list:opacity-60 hover:opacity-100!",
         )}
       >
-        <button
-          type="button"
-          onClick={onOpen}
-          title={`Open ${work.name}`}
-          aria-label={`Open ${work.name} details`}
-          data-cuelume-press
-          className="relative z-3 flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-dark-850 text-dark-100 ring-1 ring-dark-700 transition-all hover:ring-dark-500 hover:brightness-125"
-        >
+        <span className="relative z-3 flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-dark-850 text-dark-100 ring-1 ring-dark-700">
           <Icon className="size-4" aria-hidden />
-        </button>
+        </span>
 
         <div className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-[11rem]">
           <p className="text-base text-title">{work.name}</p>
@@ -87,6 +74,7 @@ function Row({
                 target="_blank"
                 rel="noopener noreferrer"
                 title={work.link.label}
+                aria-label={work.link.label}
                 data-cuelume-press
                 className={actionButton}
               >
@@ -96,6 +84,7 @@ function Row({
               <Link
                 href={work.link.href}
                 title={work.link.label}
+                aria-label={work.link.label}
                 data-cuelume-press
                 className={actionButton}
               >
@@ -113,7 +102,7 @@ export function WorkList() {
   const [selected, setSelected] = useState<ExperienceItem | null>(null);
 
   return (
-    <motion.section
+    <m.section
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "0px 0px -60px 0px" }}
@@ -127,14 +116,10 @@ export function WorkList() {
         ))}
       </div>
 
-      <AnimatePresence>
-        {selected ? (
-          <WorkDetailPanel
-            work={selected}
-            onClose={() => setSelected(null)}
-          />
-        ) : null}
-      </AnimatePresence>
-    </motion.section>
+      <WorkDetailPanel
+        work={selected}
+        onClose={() => setSelected(null)}
+      />
+    </m.section>
   );
 }

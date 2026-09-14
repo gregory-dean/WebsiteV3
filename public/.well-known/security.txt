@@ -1,0 +1,5 @@
+Contact: mailto:gregdeancyber@proton.me
+Expires: 2027-09-13T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://gregory-dean.com/.well-known/security.txt
+# flag{rfc9116}

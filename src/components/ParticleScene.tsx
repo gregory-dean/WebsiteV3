@@ -2,19 +2,38 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
-import * as THREE from "three";
-import { MathUtils } from "three";
+import {
+  BufferAttribute,
+  BufferGeometry,
+  Color,
+  MathUtils,
+  ShaderMaterial,
+  Vector2,
+} from "three";
+import { PARTICLE_FLAG_TEXT } from "@/data/ctf";
+import { PARTICLE_FRAME_CLASS } from "@/data/site";
 import type { ThemeId } from "@/data/themes";
+import { CTF_EVENT, getLastCtf } from "@/lib/ctf-event";
+import { drawFilledText, drawPadlock } from "@/lib/draw-text";
+import { getLastSignal, SIGNAL_EVENT } from "@/lib/signal-event";
 import {
   DEFAULT_THEME,
   readStoredTheme,
   themeParticleTint,
 } from "@/lib/theme";
 
+type ExtraKind = "none" | "flag" | "trophy";
+
+function resolveExtra(): ExtraKind {
+  if (!getLastSignal().on) return "none";
+  const ctf = getLastCtf();
+  return ctf.found >= ctf.total ? "trophy" : "flag";
+}
+
 const MORPH_IMAGES = [
-  "/image-name.png",
-  "/image-stack.png",
-  "/image-tools.png",
+  "/image-name.webp",
+  "/image-stack.webp",
+  "/image-tools.webp",
 ] as const;
 
 const RIPPLE_SLOTS = 8;
@@ -48,7 +67,6 @@ varying vec3 vColor;
 #define RIPPLE_BRIGHTNESS 0.6
 #define LIGHT_BRIGHTNESS 0.3
 
-// Compact 3D simplex noise
 vec4 permute(vec4 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
 vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
 
@@ -172,10 +190,13 @@ function loadImage(src: string) {
   });
 }
 
-function sampleImage(
-  img: HTMLImageElement,
+function sampleCanvas(
+  source: CanvasImageSource,
+  sourceWidth: number,
+  sourceHeight: number,
   width: number,
   height: number,
+  stride: number,
 ): { positions: number[]; colors: number[] } {
   const canvas = document.createElement("canvas");
   canvas.width = Math.floor(width);
@@ -183,25 +204,24 @@ function sampleImage(
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   if (!ctx) return { positions: [], colors: [] };
 
-  const scale = Math.max(width / img.width, height / img.height);
-  const dw = img.width * scale;
-  const dh = img.height * scale;
-  ctx.drawImage(img, (width - dw) / 2, (height - dh) / 2, dw, dh);
+  const scale = Math.max(width / sourceWidth, height / sourceHeight);
+  const dw = sourceWidth * scale;
+  const dh = sourceHeight * scale;
+  ctx.drawImage(source, (width - dw) / 2, (height - dh) / 2, dw, dh);
 
   const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const positions: number[] = [];
   const colors: number[] = [];
 
-  for (let y = 0; y < canvas.height; y += 4) {
-    for (let x = 0; x < canvas.width; x += 4) {
+  for (let y = 0; y < canvas.height; y += stride) {
+    for (let x = 0; x < canvas.width; x += stride) {
       const i = (y * canvas.width + x) * 4;
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-      const a = data[i + 3];
+      const r = data[i] ?? 0;
+      const g = data[i + 1] ?? 0;
+      const b = data[i + 2] ?? 0;
+      const a = data[i + 3] ?? 0;
       const luma = 0.299 * r + 0.587 * g + 0.114 * b;
       const score = luma * 0.2 + 0.8 * Math.max(r, g, b);
-      // Keep detailed clay art; mild cutoff still ignores near-black noise.
       if (a > 16 && score > 85) {
         positions.push(x - width / 2, height / 2 - y);
         colors.push(r / 255, g / 255, b / 255);
@@ -221,11 +241,11 @@ function padFrame(
   const n = frame.positions.length / 2;
   for (let i = 0; n > 0 && i < count; i++) {
     const t = i % n;
-    pos[i * 2] = frame.positions[t * 2];
-    pos[i * 2 + 1] = frame.positions[t * 2 + 1];
-    col[i * 3] = frame.colors[t * 3];
-    col[i * 3 + 1] = frame.colors[t * 3 + 1];
-    col[i * 3 + 2] = frame.colors[t * 3 + 2];
+    pos[i * 2] = frame.positions[t * 2] ?? 0;
+    pos[i * 2 + 1] = frame.positions[t * 2 + 1] ?? 0;
+    col[i * 3] = frame.colors[t * 3] ?? 0;
+    col[i * 3 + 1] = frame.colors[t * 3 + 1] ?? 0;
+    col[i * 3 + 2] = frame.colors[t * 3 + 2] ?? 0;
   }
   return { positions: pos, colors: col };
 }
@@ -234,16 +254,39 @@ async function sampleImages(
   width: number,
   height: number,
   images: readonly string[],
+  stride: number,
 ): Promise<SampledScene> {
   const loaded = await Promise.all(images.map(loadImage));
-  const frames = loaded.map((img) => sampleImage(img, width, height));
-  const count = Math.max(...frames.map((f) => f.positions.length / 2));
+  const frames = loaded.map((img) =>
+    sampleCanvas(img, img.width, img.height, width, height, stride),
+  );
+  const count = Math.max(...frames.map((f) => f.positions.length / 2), 1);
   const padded = frames.map((f) => padFrame(f, count));
   return {
     count,
     positions: padded.map((f) => f.positions),
     colors: padded.map((f) => f.colors),
   };
+}
+
+function explodeFrame(frame: SampledFrame, spread: number): SampledFrame {
+  const count = frame.positions.length / 2;
+  const positions = new Float32Array(count * 2);
+  const colors = new Float32Array(frame.colors);
+  for (let i = 0; i < count; i++) {
+    const x = frame.positions[i * 2] ?? 0;
+    const y = frame.positions[i * 2 + 1] ?? 0;
+    const hash = Math.sin(i * 12.9898 + x * 0.13 + y * 0.17) * 43758.5453;
+    const frac = hash - Math.floor(hash);
+    const jitter = 0.72 + frac * 0.75;
+    const throwOut = 24 + frac * 96;
+    const len = Math.hypot(x, y);
+    const nx = len > 0.5 ? x / len : Math.cos(frac * Math.PI * 2);
+    const ny = len > 0.5 ? y / len : Math.sin(frac * Math.PI * 2);
+    positions[i * 2] = x * spread * jitter + nx * throwOut;
+    positions[i * 2 + 1] = y * spread * jitter + ny * throwOut;
+  }
+  return { positions, colors };
 }
 
 type MouseState = { x: number; y: number; active: number };
@@ -253,7 +296,39 @@ type ClockApi = {
   seconds: () => number;
   advance: (dt: number) => void;
   setPaused: (paused: boolean) => void;
+  reset: () => void;
 };
+
+function createMaterial() {
+  return new ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    transparent: true,
+    depthWrite: false,
+    uniforms: {
+      uProgress: { value: 0 },
+      uPointSize: { value: 2 },
+      uDpr: { value: 1 },
+      uTime: { value: 0 },
+      uTint: { value: new Color(themeParticleTint[DEFAULT_THEME]) },
+      uLightPos: { value: new Vector2() },
+      uLightStrength: { value: 0 },
+      uLightRadius: { value: 90 },
+      uRippleOrigins: {
+        value: Array.from({ length: RIPPLE_SLOTS }, () => new Vector2()),
+      },
+      uRippleStarts: { value: new Float32Array(RIPPLE_SLOTS).fill(-1000) },
+    },
+  });
+}
+
+function disposeGeometry(geometry: BufferGeometry | null) {
+  if (!geometry) return;
+  geometry.dispose();
+  for (const key of Object.keys(geometry.attributes)) {
+    geometry.deleteAttribute(key);
+  }
+}
 
 function Particles({
   width,
@@ -262,6 +337,7 @@ function Particles({
   images,
   mouse,
   clock,
+  stride,
 }: {
   width: number;
   height: number;
@@ -269,93 +345,94 @@ function Particles({
   images: readonly string[];
   mouse: React.MutableRefObject<MouseState>;
   clock: ClockApi;
+  stride: number;
 }) {
   const [scene, setScene] = useState<SampledScene | null>(null);
+  const material = useMemo(() => createMaterial(), []);
+  const extraRef = useRef<ExtraKind>("none");
+  const burstPhase = useRef<"idle" | "gather" | "hold" | "boom" | "into" | "cycle">(
+    "idle",
+  );
+  const burstTimer = useRef(0);
+  const lockRipple = useRef(false);
   const stepRef = useRef(0);
   const progressRef = useRef(0);
-  const lastMouse = useRef(new THREE.Vector2(Infinity, Infinity));
+  const lastMouse = useRef(new Vector2(Infinity, Infinity));
   const lastMoveTime = useRef(-1000);
   const rippleArmed = useRef(false);
   const rippleIndex = useRef(0);
+  const materialRef = useRef(material);
+  const geometryRef = useRef<BufferGeometry | null>(null);
 
-  const material = useMemo(() => {
-    return new THREE.ShaderMaterial({
-      vertexShader,
-      fragmentShader,
-      transparent: true,
-      depthWrite: false,
-      uniforms: {
-        uProgress: { value: 0 },
-        uPointSize: { value: 2 },
-        uDpr: { value: 1 },
-        uTime: { value: 0 },
-        uTint: {
-          value: new THREE.Color(themeParticleTint[DEFAULT_THEME]),
-        },
-        uLightPos: { value: new THREE.Vector2() },
-        uLightStrength: { value: 0 },
-        uLightRadius: { value: 90 },
-        uRippleOrigins: {
-          value: Array.from({ length: RIPPLE_SLOTS }, () => new THREE.Vector2()),
-        },
-        uRippleStarts: { value: new Float32Array(RIPPLE_SLOTS).fill(-1000) },
-      },
-    });
-  }, []);
+  useEffect(() => () => material.dispose(), [material]);
 
   useEffect(() => {
     let cancelled = false;
-    sampleImages(width, height, images).then((result) => {
-      if (!cancelled) setScene(result);
-    });
+    sampleImages(width, height, images, stride)
+      .then((result) => {
+        if (!cancelled) setScene(result);
+      })
+      .catch(() => {
+        if (!cancelled) setScene(null);
+      });
     return () => {
       cancelled = true;
     };
-  }, [width, height, images]);
+  }, [width, height, images, stride]);
+
+  const lockFrame = useMemo(() => {
+    if (!scene) return null;
+    const canvas = drawPadlock(width, height);
+    const sampled = sampleCanvas(canvas, width, height, width, height, stride);
+    return padFrame(sampled, scene.count);
+  }, [scene, width, height, stride]);
+
+  const flagFrame = useMemo(() => {
+    if (!scene) return null;
+    const canvas = drawFilledText(width, height, PARTICLE_FLAG_TEXT);
+    const sampled = sampleCanvas(canvas, width, height, width, height, stride);
+    return padFrame(sampled, scene.count);
+  }, [scene, width, height, stride]);
+
+  const burstFrame = useMemo(() => {
+    if (!lockFrame) return null;
+    return explodeFrame(lockFrame, 2.4);
+  }, [lockFrame]);
 
   const geometry = useMemo(() => {
     if (!scene) return null;
-    const geo = new THREE.BufferGeometry();
+    const geo = new BufferGeometry();
     geo.setAttribute(
       "position",
-      new THREE.BufferAttribute(new Float32Array(scene.count * 3), 3),
+      new BufferAttribute(new Float32Array(scene.count * 3), 3),
     );
-    geo.setAttribute(
-      "aPosFrom",
-      new THREE.BufferAttribute(new Float32Array(scene.positions[0]), 2),
-    );
+    geo.setAttribute("aPosFrom", new BufferAttribute(scene.positions[0]!, 2));
     geo.setAttribute(
       "aPosTo",
-      new THREE.BufferAttribute(
-        new Float32Array(scene.positions[1 % scene.positions.length]),
-        2,
-      ),
+      new BufferAttribute(scene.positions[1 % scene.positions.length]!, 2),
     );
-    geo.setAttribute(
-      "aColFrom",
-      new THREE.BufferAttribute(new Float32Array(scene.colors[0]), 3),
-    );
+    geo.setAttribute("aColFrom", new BufferAttribute(scene.colors[0]!, 3));
     geo.setAttribute(
       "aColTo",
-      new THREE.BufferAttribute(
-        new Float32Array(scene.colors[1 % scene.colors.length]),
-        3,
-      ),
+      new BufferAttribute(scene.colors[1 % scene.colors.length]!, 3),
     );
-    stepRef.current = 0;
     return geo;
   }, [scene]);
 
-  useEffect(() => () => geometry?.dispose(), [geometry]);
-  useEffect(() => () => material.dispose(), [material]);
   useEffect(() => {
-    material.uniforms.uDpr.value = dpr;
-  }, [dpr, material]);
+    geometryRef.current = geometry;
+    stepRef.current = 0;
+    return () => disposeGeometry(geometry);
+  }, [geometry]);
+
+  useEffect(() => {
+    materialRef.current.uniforms.uDpr!.value = dpr;
+  }, [dpr]);
 
   useEffect(() => {
     const setTint = (id: ThemeId) => {
       const hex = themeParticleTint[id] ?? themeParticleTint[DEFAULT_THEME];
-      material.uniforms.uTint.value.set(hex);
+      materialRef.current.uniforms.uTint!.value.set(hex);
     };
 
     setTint(readStoredTheme());
@@ -371,44 +448,160 @@ function Particles({
       }
     };
 
+    const applyExtra = () => {
+      const next = resolveExtra();
+      if (next !== extraRef.current) {
+        if (next !== "none") lockRipple.current = true;
+        if (next === "trophy") {
+          burstPhase.current = "gather";
+          burstTimer.current = 0;
+          stepRef.current = -1;
+        } else {
+          burstPhase.current = "idle";
+        }
+      }
+      extraRef.current = next;
+    };
+
+    applyExtra();
+
     window.addEventListener("gd-theme", onTheme);
     window.addEventListener("storage", onStorage);
+    window.addEventListener(SIGNAL_EVENT, applyExtra);
+    window.addEventListener(CTF_EVENT, applyExtra);
     return () => {
       window.removeEventListener("gd-theme", onTheme);
       window.removeEventListener("storage", onStorage);
+      window.removeEventListener(SIGNAL_EVENT, applyExtra);
+      window.removeEventListener(CTF_EVENT, applyExtra);
     };
-  }, [material]);
+  }, []);
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 1 / 30);
     clock.advance(dt);
-    if (!scene || !geometry) return;
-    const uniforms = material.uniforms;
-    const frames = scene.positions.length;
-    uniforms.uTime.value += dt;
+    const currentScene = scene;
+    const currentGeometry = geometryRef.current;
+    const material = materialRef.current;
+    if (!currentScene || !currentGeometry) return;
 
-    const target = clock.targetStep();
-    progressRef.current = MathUtils.damp(progressRef.current, target, 3, dt);
+    const uniforms = material.uniforms;
+    uniforms.uTime!.value += dt;
+
+    const kind = extraRef.current;
+    const phase = burstPhase.current;
+    const bursting =
+      kind === "trophy" &&
+      (phase === "gather" || phase === "hold" || phase === "boom");
+
+    const positions = bursting && lockFrame && burstFrame
+      ? [...currentScene.positions, lockFrame.positions, burstFrame.positions]
+      : kind === "flag" && flagFrame
+        ? [...currentScene.positions, flagFrame.positions]
+        : currentScene.positions;
+    const colors = bursting && lockFrame && burstFrame
+      ? [...currentScene.colors, lockFrame.colors, burstFrame.colors]
+      : kind === "flag" && flagFrame
+        ? [...currentScene.colors, flagFrame.colors]
+        : currentScene.colors;
+    const frames = positions.length;
+    const lockIndex = currentScene.positions.length;
+    const burstIndex = lockIndex + 1;
+
+    let target = clock.targetStep();
+    let damp = 3;
+
+    if (bursting && lockFrame && burstFrame) {
+      if (phase === "gather") {
+        target = lockIndex;
+        if (Math.abs(progressRef.current - lockIndex) < 0.05) {
+          burstPhase.current = "hold";
+          burstTimer.current = 0;
+        }
+      } else if (phase === "hold") {
+        target = lockIndex;
+        burstTimer.current += dt;
+        if (burstTimer.current > 0.75) {
+          burstPhase.current = "boom";
+          const now = uniforms.uTime!.value;
+          for (let k = 0; k < RIPPLE_SLOTS; k++) {
+            const angle = (k / RIPPLE_SLOTS) * Math.PI * 2;
+            uniforms.uRippleOrigins!.value[k].set(
+              Math.cos(angle) * 10,
+              Math.sin(angle) * 10,
+            );
+            uniforms.uRippleStarts!.value[k] = now + k * 0.035;
+          }
+        }
+      } else {
+        target = burstIndex;
+        damp = 9;
+        if (Math.abs(progressRef.current - burstIndex) < 0.06) {
+          burstPhase.current = "into";
+          (currentGeometry.attributes.aPosFrom!.array as Float32Array).set(
+            burstFrame.positions,
+          );
+          (currentGeometry.attributes.aPosTo!.array as Float32Array).set(
+            currentScene.positions[0]!,
+          );
+          (currentGeometry.attributes.aColFrom!.array as Float32Array).set(
+            burstFrame.colors,
+          );
+          (currentGeometry.attributes.aColTo!.array as Float32Array).set(
+            currentScene.colors[0]!,
+          );
+          for (const key of ["aPosFrom", "aPosTo", "aColFrom", "aColTo"] as const) {
+            currentGeometry.attributes[key]!.needsUpdate = true;
+          }
+          progressRef.current = 0;
+          stepRef.current = 0;
+          target = 1;
+          damp = 4;
+        }
+      }
+    } else if (kind === "trophy" && phase === "into") {
+      target = 1;
+      damp = 4;
+      if (progressRef.current > 0.92) {
+        burstPhase.current = "cycle";
+        clock.reset();
+        progressRef.current = 0;
+        stepRef.current = -1;
+        target = 0;
+      }
+    }
+
+    progressRef.current = MathUtils.damp(progressRef.current, target, damp, dt);
     const floor = Math.floor(progressRef.current);
-    uniforms.uProgress.value = progressRef.current - floor;
+    uniforms.uProgress!.value = progressRef.current - floor;
 
     const from = ((floor % frames) + frames) % frames;
-    if (from !== stepRef.current) {
+    if (from !== stepRef.current && burstPhase.current !== "into") {
       const to = (from + 1) % frames;
-      (
-        geometry.attributes.aPosFrom.array as Float32Array
-      ).set(scene.positions[from]);
-      (
-        geometry.attributes.aPosTo.array as Float32Array
-      ).set(scene.positions[to]);
-      (
-        geometry.attributes.aColFrom.array as Float32Array
-      ).set(scene.colors[from]);
-      (geometry.attributes.aColTo.array as Float32Array).set(scene.colors[to]);
+      (currentGeometry.attributes.aPosFrom!.array as Float32Array).set(
+        positions[from]!,
+      );
+      (currentGeometry.attributes.aPosTo!.array as Float32Array).set(
+        positions[to]!,
+      );
+      (currentGeometry.attributes.aColFrom!.array as Float32Array).set(
+        colors[from]!,
+      );
+      (currentGeometry.attributes.aColTo!.array as Float32Array).set(
+        colors[to]!,
+      );
       for (const key of ["aPosFrom", "aPosTo", "aColFrom", "aColTo"] as const) {
-        geometry.attributes[key].needsUpdate = true;
+        currentGeometry.attributes[key]!.needsUpdate = true;
       }
       stepRef.current = from;
+    }
+
+    if (lockRipple.current) {
+      lockRipple.current = false;
+      const i = rippleIndex.current;
+      uniforms.uRippleOrigins!.value[i].set(0, 0);
+      uniforms.uRippleStarts!.value[i] = uniforms.uTime!.value;
+      rippleIndex.current = (i + 1) % RIPPLE_SLOTS;
     }
 
     const m = mouse.current;
@@ -417,15 +610,15 @@ function Particles({
       Math.hypot(m.x - lastMouse.current.x, m.y - lastMouse.current.y) > 1
     ) {
       lastMouse.current.set(m.x, m.y);
-      lastMoveTime.current = uniforms.uTime.value;
+      lastMoveTime.current = uniforms.uTime!.value;
       rippleArmed.current = false;
     }
 
-    const sinceMove = uniforms.uTime.value - lastMoveTime.current;
+    const sinceMove = uniforms.uTime!.value - lastMoveTime.current;
     const lightTarget = m.active && sinceMove < 0.08 ? 1 : 0;
-    uniforms.uLightPos.value.set(m.x, m.y);
-    uniforms.uLightStrength.value = MathUtils.damp(
-      uniforms.uLightStrength.value,
+    uniforms.uLightPos!.value.set(m.x, m.y);
+    uniforms.uLightStrength!.value = MathUtils.damp(
+      uniforms.uLightStrength!.value,
       lightTarget,
       14,
       dt,
@@ -434,8 +627,8 @@ function Particles({
     if (m.active && !rippleArmed.current && sinceMove > 0.1) {
       rippleArmed.current = true;
       const i = rippleIndex.current;
-      uniforms.uRippleOrigins.value[i].set(m.x, m.y);
-      uniforms.uRippleStarts.value[i] = uniforms.uTime.value;
+      uniforms.uRippleOrigins!.value[i].set(m.x, m.y);
+      uniforms.uRippleStarts!.value[i] = uniforms.uTime!.value;
       rippleIndex.current = (i + 1) % RIPPLE_SLOTS;
     }
   });
@@ -458,15 +651,20 @@ function createMorphClock(delay: number, morph: number): ClockApi {
     setPaused: (next) => {
       paused = next;
     },
+    reset: () => {
+      elapsed = delay;
+    },
   };
 }
 
 export function ParticleScene({
   delay = 0.95,
   morphSeconds = 6,
+  framed = false,
 }: {
   delay?: number;
   morphSeconds?: number;
+  framed?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mouse = useRef<MouseState>({ x: 0, y: 0, active: 0 });
@@ -476,17 +674,25 @@ export function ParticleScene({
   );
 
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const [dpr, setDpr] = useState(1);
+  const [dpr] = useState(() => {
+    if (typeof window === "undefined") return 1;
+    const mobile = window.innerWidth < 768;
+    return Math.min(window.devicePixelRatio || 1, mobile ? 1 : 2);
+  });
+  const [playing, setPlaying] = useState(true);
 
   useEffect(() => {
-    const sync = () => clock.setPaused(document.hidden);
+    const sync = () => {
+      const hidden = document.hidden;
+      clock.setPaused(hidden);
+      setPlaying((current) => (hidden ? false : current));
+    };
     sync();
     document.addEventListener("visibilitychange", sync);
     return () => document.removeEventListener("visibilitychange", sync);
   }, [clock]);
 
   useEffect(() => {
-    setDpr(Math.min(window.devicePixelRatio || 1, 2));
     const el = containerRef.current;
     if (!el) return;
     const ro = new ResizeObserver((entries) => {
@@ -494,13 +700,29 @@ export function ParticleScene({
       if (rect) setSize({ width: rect.width, height: rect.height });
     });
     ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        const visible = Boolean(entry?.isIntersecting);
+        clock.setPaused(!visible || document.hidden);
+        setPlaying(visible && !document.hidden);
+      },
+      { threshold: 0.05 },
+    );
+    io.observe(el);
+
+    return () => {
+      ro.disconnect();
+      io.disconnect();
+    };
+  }, [clock]);
+
+  const stride = size.width > 0 && size.width < 500 ? 6 : 4;
 
   return (
     <div
       ref={containerRef}
-      className="relative mt-3 h-30 w-full overflow-hidden rounded-md border border-dark-700 border-t-hairline sm:h-35 md:h-45"
+      className={framed ? "absolute inset-0" : PARTICLE_FRAME_CLASS}
       onPointerMove={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         mouse.current.x = e.clientX - rect.left - rect.width / 2;
@@ -517,7 +739,26 @@ export function ParticleScene({
           orthographic
           camera={{ position: [0, 0, 100], zoom: 1, near: 0.1, far: 1000 }}
           dpr={dpr}
-          gl={{ antialias: true, alpha: true }}
+          frameloop={playing ? "always" : "never"}
+          gl={{
+            antialias: false,
+            alpha: true,
+            powerPreference: "low-power",
+            depth: false,
+            stencil: false,
+          }}
+          onCreated={({ gl }) => {
+            const canvas = gl.domElement;
+            const onLost = (event: Event) => {
+              event.preventDefault();
+              clock.setPaused(true);
+            };
+            const onRestored = () => {
+              clock.setPaused(document.hidden);
+            };
+            canvas.addEventListener("webglcontextlost", onLost);
+            canvas.addEventListener("webglcontextrestored", onRestored);
+          }}
         >
           <Particles
             width={size.width}
@@ -526,6 +767,7 @@ export function ParticleScene({
             images={MORPH_IMAGES}
             mouse={mouse}
             clock={clock}
+            stride={stride}
           />
         </Canvas>
       ) : null}

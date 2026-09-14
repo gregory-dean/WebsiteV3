@@ -14,19 +14,19 @@ coverAlt: Lynx secret scanner terminal output
 
 ## Why I built it
 
-Every big breach writeup seems to include the same quiet detail: a credential that was sitting in a repository the whole time. I wanted to understand that failure mode from the inside. How do secrets actually end up in code? What do they look like once they're there? And what would it take to catch them before a push instead of after an incident?
+Every big breach writeup seems to include the same quiet detail: a credential that was sitting in a repository the whole time. I wanted to understand that failure mode from the inside. How do secrets actually end up in code? What do they look like once they are there? And what would it take to catch them before a push instead of after an incident?
 
-Instead of just reading about it, I started building [Lynx](https://github.com/gregory-dean/Lynx), a fast CLI that scans repositories and filesystems for leaked credentials, API keys, and high-entropy strings. It's an active project and it has taught me more about secret hygiene than any blog post could.
+Instead of just reading about it, I started building [Lynx](https://github.com/gregory-dean/Lynx), a CLI that scans repositories and filesystems for leaked credentials, API keys, and high-entropy strings. It is an active project. Building it has taught me more about secret hygiene than any blog post.
 
 ## How it works
 
-Lynx layers a few detection strategies so that one weak signal doesn't decide the outcome:
+Lynx layers a few detection strategies so that one weak signal does not decide the outcome:
 
 - Regex rules for known formats like AWS keys, GitHub tokens, Slack webhooks, Stripe keys, PEM private keys, JWTs, database URLs, and npm tokens
-- Shannon entropy filtering to flag random-looking strings that don't match a known pattern
+- Shannon entropy filtering to flag random-looking strings that do not match a known pattern
 - Keyword proximity so a match near `token` or `secret` carries more weight than one in the middle of test fixtures
 
-One of my favorite parts is history scanning. Deleting a secret from the working tree doesn't remove it from git, so Lynx can walk historical blobs and report the first commit where a finding appeared:
+History scanning is the part I keep coming back to. Deleting a secret from the working tree does not remove it from git, so Lynx can walk historical blobs and report the first commit where a finding appeared:
 
 ```bash
 lynx scan .              # scan the working tree
@@ -35,17 +35,17 @@ lynx scan . --history    # scan git history for secrets that were "removed"
 
 ## Built for CI, not just laptops
 
-The tool is designed to sit in a pipeline and fail loudly:
+The tool is meant to sit in a pipeline and fail loudly:
 
 - Table output for humans, JSON and SARIF for machines and GitHub code scanning
 - Exit codes that CI understands: 0 clean, 1 findings, 2 error
-- Baselines to acknowledge known findings so new leaks stand out instead of drowning in noise
-- Custom rules in YAML for organization specific token formats
+- Baselines to acknowledge known findings so new leaks stand out
+- Custom rules in YAML for organization-specific token formats
 
-Everything runs locally. There's no telemetry, and nothing leaves the machine unless you explicitly opt into live verification of a finding.
+Everything runs locally. There is no telemetry. Nothing leaves the machine unless you opt into live verification of a finding.
 
 ## What I learned
 
-The biggest lesson is that leaks are a workflow problem, not a carelessness problem. Secrets slip in through example configs that become real configs, debug scripts that never got cleaned up, and history that everyone forgot about. Tooling that runs automatically, close to the developer, is what actually prevents the accident.
+Leaks are a workflow problem, not a carelessness problem. Secrets slip in through example configs that become real configs, debug scripts that never got cleaned up, and history that everyone forgot about. Tooling that runs automatically, close to the developer, is what actually prevents the accident.
 
-That lesson feeds directly into my day job, where I'm implementing secret scanning as part of hardening internal development workflows. Building the scanner myself means I understand exactly what the guardrails can and can't see.
+That lesson feeds into my day job, where I am putting secret scanning into internal development workflows. Building the scanner myself means I know what the guardrails can and cannot see.

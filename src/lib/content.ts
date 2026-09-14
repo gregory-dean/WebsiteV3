@@ -8,12 +8,6 @@ export { formatDate } from "@/lib/types";
 
 const writingDir = path.join(process.cwd(), "content/writing");
 
-function ensureDir() {
-  if (!fs.existsSync(writingDir)) {
-    fs.mkdirSync(writingDir, { recursive: true });
-  }
-}
-
 function normalizeDate(value: unknown): string {
   if (!value) return "";
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
@@ -31,11 +25,18 @@ function normalizeDate(value: unknown): string {
 }
 
 const STATUSES: readonly WritingStatus[] = ["active", "lab", "complete"];
+const KINDS: readonly WritingMeta["kind"][] = ["writeup", "project", "note"];
 
 function parseStatus(value: unknown): WritingStatus | undefined {
   return STATUSES.includes(value as WritingStatus)
     ? (value as WritingStatus)
     : undefined;
+}
+
+function parseKind(value: unknown): WritingMeta["kind"] {
+  return KINDS.includes(value as WritingMeta["kind"])
+    ? (value as WritingMeta["kind"])
+    : "writeup";
 }
 
 function parseMeta(data: Record<string, unknown>, slug: string): WritingMeta {
@@ -44,7 +45,7 @@ function parseMeta(data: Record<string, unknown>, slug: string): WritingMeta {
     title: String(data.title ?? slug),
     summary: String(data.summary ?? ""),
     date: normalizeDate(data.date),
-    kind: (data.kind as WritingMeta["kind"]) ?? "writeup",
+    kind: parseKind(data.kind),
     tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
     draft: Boolean(data.draft),
     cover: data.cover ? String(data.cover) : undefined,
@@ -54,7 +55,7 @@ function parseMeta(data: Record<string, unknown>, slug: string): WritingMeta {
 }
 
 export function getAllWriting(): WritingMeta[] {
-  ensureDir();
+  if (!fs.existsSync(writingDir)) return [];
   const files = fs
     .readdirSync(writingDir)
     .filter((f) => f.endsWith(".mdx") || f.endsWith(".md"));
@@ -67,18 +68,20 @@ export function getAllWriting(): WritingMeta[] {
       return parseMeta(data, slug);
     })
     .filter((p) => !p.draft)
-    .sort((a, b) => (a.date < b.date ? 1 : -1));
+    .sort((a, b) => b.date.localeCompare(a.date));
 }
 
 export function getWriting(slug: string): WritingPost | null {
-  ensureDir();
+  if (!fs.existsSync(writingDir)) return null;
   const candidates = [`${slug}.mdx`, `${slug}.md`];
   for (const file of candidates) {
     const full = path.join(writingDir, file);
     if (!fs.existsSync(full)) continue;
     const raw = fs.readFileSync(full, "utf8");
     const { data, content } = matter(raw);
-    return { ...parseMeta(data, slug), content };
+    const meta = parseMeta(data, slug);
+    if (meta.draft) return null;
+    return { ...meta, content };
   }
   return null;
 }

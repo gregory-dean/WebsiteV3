@@ -1,28 +1,18 @@
 "use client";
 
-import { motion } from "motion/react";
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import {
-  DURATION_TOTAL_REVEAL,
-  list,
-  reveal,
-  revealBig,
-  site,
-} from "@/data/site";
+import { DURATION_TOTAL_REVEAL, site } from "@/data/site";
 import { EmphasizedLink } from "@/components/LinkOrnament";
+import { ParticleHost } from "@/components/ParticleHost";
 import { SocialLinks } from "@/components/SocialLinks";
-
-const ParticleScene = dynamic(
-  () =>
-    import("@/components/ParticleScene").then((m) => m.ParticleScene),
-  { ssr: false },
-);
+import { usePrefersReducedMotion } from "@/lib/reduced-motion";
 
 export function Hero() {
   const [step, setStep] = useState(0);
+  const reduceMotion = usePrefersReducedMotion();
 
   useEffect(() => {
+    if (reduceMotion) return;
     let elapsed = 0;
     let last = performance.now();
     let hidden = document.hidden;
@@ -52,56 +42,50 @@ export function Hero() {
       cancelAnimationFrame(frame);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, []);
+  }, [reduceMotion]);
 
   return (
-    <motion.div
-      className="flex w-full flex-col gap-6 will-change-transform"
-      initial="hidden"
-      animate="visible"
-      variants={list}
-    >
-      <motion.p variants={reveal} className="text-lg text-title">
-        Hi, I&apos;m {site.name}
-      </motion.p>
+    <div className="flex w-full flex-col gap-6">
+      <p className="hero-reveal text-lg text-title">
+        Hey, I&apos;m {site.shortName}!
+      </p>
 
-      <motion.p
-        variants={reveal}
-        className="text-base text-description [&>span]:text-title"
-      >
+      <p className="hero-reveal hero-reveal-2 text-base text-description [&>span]:text-title">
         I&apos;m a{" "}
         <EmphasizedLink
-          value="cybersecurity practitioner"
+          value="cybersecurity professional"
           active={step === 0}
           href={site.links.linkedin}
         />{" "}
-        focused on defending systems, clarifying risk, and building practical
-        security work. <br />
-        Trained through Evolve Security Academy, fluent in offense and defense
-        across networks, Active Directory, and SOC tooling.
-      </motion.p>
+        with experience across a few different sectors. My focus is SOC
+        analysis, web app penetration testing, and IT infrastructure. I&apos;m
+        comfortable with the usual red and blue team tooling, and I&apos;ve
+        built networks and then secured them.
+        <br />
+        I approach every problem with curiosity. I want to understand the
+        underlying system before I try to defend it.
+      </p>
 
-      <motion.div variants={revealBig} className="w-full">
-        <div className="flex w-full flex-col gap-6">
-          <p className="text-base text-description [&>span]:text-title">
-            Recent adventures include a full{" "}
-            <EmphasizedLink
-              value="cybersecurity homelab"
-              active={step === 2}
-              href="https://github.com/gregory-dean/Homelab"
-            />{" "}
-            and hands-on apprentice work at Evolve. Browse my{" "}
-            <EmphasizedLink
-              value="projects and writing"
-              active={step === 1}
-              href="/writing"
-            />
-            .
-          </p>
-          <ParticleScene delay={DURATION_TOTAL_REVEAL} morphSeconds={6} />
-          <SocialLinks />
-        </div>
-      </motion.div>
-    </motion.div>
+      <div className="hero-reveal hero-reveal-3 flex w-full flex-col gap-6">
+        <p className="text-base text-description [&>span]:text-title">
+          Below you&apos;ll find my experience, plus{" "}
+          <EmphasizedLink
+            value="writeups and projects"
+            active={step === 1}
+            href="/writing"
+          />{" "}
+          I found interesting. My most recent project was a full rebuild of my
+          homelab on new physical hardware.{" "}
+          <EmphasizedLink
+            value="Check it out here"
+            active={step === 2}
+            href="/writing/homelab-foundation"
+          />
+          !
+        </p>
+        <ParticleHost />
+        <SocialLinks />
+      </div>
+    </div>
   );
 }

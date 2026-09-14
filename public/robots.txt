@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+# disclosure policy: /.well-known/security.txt
